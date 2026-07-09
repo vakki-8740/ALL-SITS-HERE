@@ -92,6 +92,177 @@ const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 
 
+// ====================== TAB NAVIGATION ======================
+let currentTab = 'pageChat';
+
+document.querySelectorAll('.tab-item').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    var tabId = this.dataset.tab;
+    switchTab(tabId);
+  });
+});
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelector('.tab-item[data-tab="' + tabId + '"]').classList.add('active');
+  document.querySelectorAll('.page-section').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById(tabId).classList.add('active');
+
+  if (tabId === 'pageStats') {
+    refreshStats();
+  } else if (tabId === 'pageChat') {
+    if (userListPanel) {
+      userListPanel.classList.remove('hidden');
+      userListPanel.classList.remove('sidebar-open');
+    }
+  }
+}
+
+// ====================== BROADCAST ======================
+document.getElementById('sendBroadcastBtn').addEventListener('click', async function() {
+  var text = document.getElementById('broadcastText').value.trim();
+  if (!text) { showToast('Please enter a message'); return; }
+
+  this.disabled = true;
+  this.textContent = 'Sending...';
+  document.getElementById('broadcastLog').textContent = '';
+
+  try {
+    var snapshot = await fdb.collection('chatUsers').get();
+    var sent = 0;
+    var logEl = document.getElementById('broadcastLog');
+
+    for (var i = 0; i < snapshot.docs.length; i++) {
+      var userDoc = snapshot.docs[i];
+      var userId = userDoc.id;
+
+      await fdb.collection('chatMessages').doc(userId).collection('messages').add({
+        sender: 'admin',
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        deleted: false,
+        isBroadcast: true
+      });
+
+      await fdb.collection('chatUsers').doc(userId).update({
+        lastMessage: text,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      sent++;
+      if (i % 5 === 0) {
+        logEl.textContent = 'Sent to ' + sent + ' users...';
+      }
+    }
+
+    logEl.textContent = 'Broadcast sent to ' + sent + ' users!';
+    showToast('Broadcast sent to ' + sent + ' users');
+    document.getElementById('broadcastText').value = '';
+  } catch (err) {
+    console.error('Broadcast error:', err);
+    showToast('Broadcast failed: ' + err.message);
+  }
+
+  this.disabled = false;
+  this.textContent = 'Send to All Users';
+});
+
+// ====================== STATS ======================
+function refreshStats() {
+  if (!users) return;
+  var total = users.length;
+  var online = users.filter(function(u) { return u.online === true; }).length;
+  var blocked = users.filter(function(u) { return u.blocked === true; }).length;
+  var now = Date.now();
+  var newToday = users.filter(function(u) {
+    if (!u.createdAt || !u.createdAt.toDate) return false;
+    return (now - u.createdAt.toDate().getTime()) < 86400000;
+  }).length;
+
+  document.getElementById('statTotalUsers').textContent = total;
+  document.getElementById('statOnlineUsers').textContent = online;
+  document.getElementById('statBlockedUsers').textContent = blocked;
+  document.getElementById('statNewToday').textContent = newToday;
+
+  var recentEl = document.getElementById('recentUsersList');
+  var recent = users.slice(0, 10);
+  recentEl.innerHTML = recent.map(function(u) {
+    var name = u.userName || u.name || 'User #' + (u.assignedId || '?');
+    var active = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--ios-separator);">' +
+      '<span>' + name + '</span>' +
+      '<span style="color:var(--ios-subtext);font-size:11px;">' + active + '</span></div>';
+  }).join('');
+  if (recent.length === 0) recentEl.innerHTML = '<div style="padding:12px 0;color:var(--ios-subtext);text-align:center;">No users yet</div>';
+}
+
+// ====================== SETTINGS ======================
+var autoReplyToggle = document.getElementById('autoReplyToggle');
+var autoReplyText = document.getElementById('autoReplyText');
+var tgNotifyToggle = document.getElementById('tgNotifyToggle');
+
+autoReplyToggle.addEventListener('change', function() {
+  autoReplyText.style.display = this.checked ? 'block' : 'none';
+  localStorage.setItem('adminAutoReply', this.checked ? '1' : '0');
+  if (this.checked) localStorage.setItem('adminAutoReplyText', autoReplyText.value);
+  document.getElementById('settingsStatus').textContent = this.checked ? 'Auto-reply enabled' : 'Auto-reply disabled';
+});
+
+autoReplyText.addEventListener('input', function() {
+  localStorage.setItem('adminAutoReplyText', this.value);
+});
+
+tgNotifyToggle.addEventListener('change', function() {
+  var slider = document.getElementById('tgNotifySlider');
+  var bg = this.checked ? '#34c759' : '#e9e9eb';
+  this.parentElement.querySelector('span:first-of-type').style.background = bg;
+  slider.style.left = this.checked ? '22px' : '2px';
+  localStorage.setItem('adminTgNotify', this.checked ? '1' : '0');
+  document.getElementById('settingsStatus').textContent = this.checked ? 'Telegram notifications on' : 'Telegram notifications off';
+});
+
+// Load saved settings
+(function loadSettings() {
+  if (localStorage.getItem('adminAutoReply') === '1') {
+    autoReplyToggle.checked = true;
+    autoReplyText.style.display = 'block';
+    var savedText = localStorage.getItem('adminAutoReplyText');
+    if (savedText) autoReplyText.value = savedText;
+  }
+  if (localStorage.getItem('adminTgNotify') !== '0') {
+    tgNotifyToggle.checked = true;
+    document.getElementById('tgNotifySlider').style.left = '22px';
+    document.getElementById('tgNotifySlider').parentElement.querySelector('span:first-of-type').style.background = '#34c759';
+  }
+})();
+
+document.getElementById('clearAllChatsBtn').addEventListener('click', async function() {
+  if (!confirm('Are you sure you want to delete ALL chats? This cannot be undone!')) return;
+  this.disabled = true;
+  this.textContent = 'Clearing...';
+  try {
+    var snapshot = await fdb.collection('chatUsers').get();
+    var count = 0;
+    for (var i = 0; i < snapshot.docs.length; i++) {
+      var userId = snapshot.docs[i].id;
+      var msgSnap = await fdb.collection('chatMessages').doc(userId).collection('messages').get();
+      var batch = fdb.batch();
+      msgSnap.forEach(function(d) { batch.delete(d.ref); });
+      await batch.commit();
+      await fdb.collection('chatUsers').doc(userId).update({ lastMessage: '', lastActive: firebase.firestore.FieldValue.serverTimestamp() });
+      count++;
+    }
+    showToast('Cleared ' + count + ' user chats');
+    document.getElementById('settingsStatus').textContent = 'All chats cleared successfully';
+  } catch (err) {
+    console.error('Clear failed:', err);
+    showToast('Failed to clear chats');
+  }
+  this.disabled = false;
+  this.textContent = 'Clear All Chats';
+});
+
 // ====================== SIDEBAR TOGGLE ======================
 function toggleSidebar() {
   userListPanel.classList.toggle('sidebar-open');
@@ -134,6 +305,7 @@ function subscribeUsers() {
       });
       renderUserList(searchInput.value);
       if (selectedUserId) updateBlockBtn(selectedUserId);
+      if (currentTab === 'pageStats') refreshStats();
     }, (err) => {
       console.error('Users error:', err);
     });
@@ -540,17 +712,19 @@ async function adminSendMessage() {
     adminSendBtn.disabled = true;
     autoResizeTextarea();
 
-    // Forward admin reply to Telegram
-    try {
-      const userSnap = await fdb.collection('chatUsers').doc(selectedUserId).get();
-      const userData = userSnap.data();
-      if (userData) {
-        var tgText = '\uD83D\uDC4B ' + getUE(selectedUserAssignedId) + ' <b>User ' + selectedUserAssignedId + ':</b>\n';
-        tgText += '\uD83D\uDCAC <b>Admin:</b> ' + (text || '');
-        await sendTelegramText(tgText, userData.telegramThreadId || null);
+    // Forward admin reply to Telegram (if enabled)
+    if (localStorage.getItem('adminTgNotify') !== '0') {
+      try {
+        const userSnap = await fdb.collection('chatUsers').doc(selectedUserId).get();
+        const userData = userSnap.data();
+        if (userData) {
+          var tgText = '\uD83D\uDC4B ' + getUE(selectedUserAssignedId) + ' <b>User ' + selectedUserAssignedId + ':</b>\n';
+          tgText += '\uD83D\uDCAC <b>Admin:</b> ' + (text || '');
+          await sendTelegramText(tgText, userData.telegramThreadId || null);
+        }
+      } catch (tgErr) {
+        console.error('Telegram forward error:', tgErr);
       }
-    } catch (tgErr) {
-      console.error('Telegram forward error:', tgErr);
     }
   } catch (err) {
     console.error('Send failed:', err);

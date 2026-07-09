@@ -41,6 +41,17 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    /* ==================== PAGE SECTIONS ==================== */
+    .page-section {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .page-section.active {
+      display: flex;
+    }
+
     /* ==================== NAV ==================== */
     .nav {
       position: fixed;
@@ -179,7 +190,7 @@
     /* ==================== SPLIT VIEW ==================== */
     .app-container {
       display: flex;
-      height: 100%;
+      height: calc(100% - 50px - var(--safe-bottom));
       padding-top: calc(var(--safe-top) + 44px);
     }
 
@@ -654,6 +665,96 @@
       cursor: not-allowed;
     }
 
+    /* ==================== BOTTOM TAB BAR ==================== */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      padding-bottom: var(--safe-bottom);
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid var(--ios-separator);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: calc(50px + var(--safe-bottom));
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 4px 12px;
+      min-width: 60px;
+      transition: opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .tab-item:active {
+      opacity: 0.6;
+    }
+
+    .tab-item svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--ios-dark-gray);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tab-item.active svg {
+      stroke: var(--ios-blue);
+    }
+
+    .tab-item span {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ios-dark-gray);
+    }
+
+    .tab-item.active span {
+      color: var(--ios-blue);
+    }
+
+    .tab-item .badge-dot {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ios-red);
+    }
+
+    /* ==================== PAGE SECTIONS ==================== */
+    .page-section {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .page-section.active {
+      display: flex;
+    }
+
+    .app-container {
+      display: flex;
+      height: calc(100% - 50px - var(--safe-bottom));
+      padding-top: calc(var(--safe-top) + 44px);
+    }
+
     /* ==================== IMAGE PREVIEW ==================== */
     .image-preview {
       display: none;
@@ -748,6 +849,7 @@
     @media (min-width: 768px) {
       .app-container {
         flex-direction: row;
+        height: calc(100% - 50px - var(--safe-bottom));
       }
 
       .user-list-panel {
@@ -788,7 +890,7 @@
         position: fixed;
         left: 0;
         top: calc(var(--safe-top) + 44px);
-        height: calc(100% - var(--safe-top) - 44px);
+        height: calc(100% - var(--safe-top) - 44px - 50px - var(--safe-bottom));
         width: 100%;
         z-index: 50;
         transform: none;
@@ -962,69 +1064,183 @@
     </div>
   </div>
 
-  <!-- App Container -->
-  <div class="app-container">
-    <!-- User List -->
-    <div class="user-list-panel" id="userListPanel">
-      <div class="search-bar">
-        <input class="search-input" id="searchInput" type="text" placeholder="Search by ID or name...">
+  <!-- Page: Chat -->
+  <div class="page-section active" id="pageChat">
+    <div class="app-container" style="height:100%;padding-top:0;">
+      <!-- User List -->
+      <div class="user-list-panel" id="userListPanel">
+        <div class="search-bar">
+          <input class="search-input" id="searchInput" type="text" placeholder="Search by ID or name...">
+        </div>
+        <div class="list-section-header" id="sectionHeader">All Users</div>
+        <div id="userList"></div>
       </div>
-      <div class="list-section-header" id="sectionHeader">All Users</div>
-      <div id="userList"></div>
-    </div>
 
-    <!-- Chat Panel -->
-    <div class="chat-panel" id="chatPanel">
-      <div class="chat-messages" id="chatMessages">
-        <div class="no-chat-selected" id="noChatSelected">
-          <div class="icon">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--ios-dark-gray)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="9" y1="10" x2="15" y2="10"/>
-              <line x1="12" y1="13" x2="15" y2="13"/>
-            </svg>
+      <!-- Chat Panel -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="no-chat-selected" id="noChatSelected">
+            <div class="icon">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--ios-dark-gray)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <line x1="9" y1="10" x2="15" y2="10"/>
+                <line x1="12" y1="13" x2="15" y2="13"/>
+              </svg>
+            </div>
+            <h3>Select a User</h3>
+            <p>Choose a user from the list to view their chat</p>
           </div>
-          <h3>Select a User</h3>
-          <p>Choose a user from the list to view their chat</p>
+          <div class="admin-chat-container" id="adminChatContainer" style="display:none"></div>
         </div>
-        <div class="admin-chat-container" id="adminChatContainer" style="display:none"></div>
-      </div>
 
-      <!-- Edit Bar -->
-      <div class="edit-bar" id="editBar">
-        <span>Editing message</span>
-        <button class="cancel-edit" id="cancelEditBtn">Cancel</button>
-      </div>
-
-      <!-- Input -->
-      <div class="input-bar" id="inputBar" style="display:none">
-        <div class="image-preview" id="imagePreview">
-          <img id="previewImg" src="" alt="preview">
-          <button class="remove-img" id="removeImg">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+        <!-- Edit Bar -->
+        <div class="edit-bar" id="editBar">
+          <span>Editing message</span>
+          <button class="cancel-edit" id="cancelEditBtn">Cancel</button>
         </div>
-        <div class="input-inner">
-          <button class="attach-btn" id="attachBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-            </svg>
-          </button>
-          <input type="file" id="fileInput" accept="image/*" style="display:none">
 
-          <textarea class="admin-text-input" id="adminTextInput" placeholder="Reply as Support..." rows="1"></textarea>
-          <button class="admin-send-btn" id="adminSendBtn" disabled>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="19" x2="12" y2="5"/>
-              <polyline points="5 12 12 5 19 12"/>
-            </svg>
-          </button>
+        <!-- Input -->
+        <div class="input-bar" id="inputBar" style="display:none">
+          <div class="image-preview" id="imagePreview">
+            <img id="previewImg" src="" alt="preview">
+            <button class="remove-img" id="removeImg">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="input-inner">
+            <button class="attach-btn" id="attachBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+            <textarea class="admin-text-input" id="adminTextInput" placeholder="Reply as Support..." rows="1"></textarea>
+            <button class="admin-send-btn" id="adminSendBtn" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Page: Broadcast -->
+  <div class="page-section" id="pageBroadcast">
+    <div class="nav" style="position:relative;">
+      <div class="nav-inner">
+        <span class="nav-title">Broadcast Message</span>
+      </div>
+    </div>
+    <div style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="background:var(--ios-grouped-bg);border-radius:12px;padding:16px;">
+        <label style="font-size:13px;font-weight:500;color:var(--ios-subtext);display:block;margin-bottom:6px;">Message to all users</label>
+        <textarea id="broadcastText" class="admin-text-input" placeholder="Type your broadcast message..." rows="4" style="width:100%;border:0.5px solid var(--ios-separator);border-radius:10px;padding:12px;font-size:15px;font-family:inherit;resize:vertical;background:#fff;"></textarea>
+      </div>
+      <button id="sendBroadcastBtn" class="action-btn" style="background:var(--ios-blue);color:white;border:none;padding:12px;border-radius:12px;font-size:16px;font-weight:600;width:100%;cursor:pointer;font-family:inherit;">Send to All Users</button>
+      <div id="broadcastLog" style="font-size:13px;color:var(--ios-subtext);padding:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Page: Stats -->
+  <div class="page-section" id="pageStats">
+    <div class="nav" style="position:relative;">
+      <div class="nav-inner">
+        <span class="nav-title">Statistics</span>
+      </div>
+    </div>
+    <div style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:var(--ios-blue);" id="statTotalUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;">Total Users</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:var(--ios-green);" id="statOnlineUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;">Online Now</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:var(--ios-red);" id="statBlockedUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;">Blocked</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#FF9500;" id="statNewToday">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;">New Today</div>
+        </div>
+      </div>
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Recent Users</div>
+        <div id="recentUsersList" style="font-size:13px;color:var(--ios-subtext);max-height:200px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Settings -->
+  <div class="page-section" id="pageSettings">
+    <div class="nav" style="position:relative;">
+      <div class="nav-inner">
+        <span class="nav-title">Settings</span>
+      </div>
+    </div>
+    <div style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:500;">Auto-Reply</div>
+            <div style="font-size:12px;color:var(--ios-subtext);">Automatically reply to new users</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:28px;">
+            <input type="checkbox" id="autoReplyToggle" style="opacity:0;width:0;height:0;">
+            <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e9e9eb;border-radius:14px;transition:0.3s;"></span>
+            <span id="autoReplySlider" style="position:absolute;cursor:pointer;top:2px;left:2px;width:24px;height:24px;background:white;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+          </label>
+        </div>
+        <textarea id="autoReplyText" placeholder="Auto-reply message..." rows="2" style="width:100%;margin-top:12px;border:0.5px solid var(--ios-separator);border-radius:10px;padding:10px;font-size:14px;font-family:inherit;resize:none;background:#f9f9f9;display:none;">Thank you for contacting us! How can we help you?</textarea>
+      </div>
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:500;">Telegram Notifications</div>
+            <div style="font-size:12px;color:var(--ios-subtext);">Send chat updates to Telegram</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:28px;">
+            <input type="checkbox" id="tgNotifyToggle" checked style="opacity:0;width:0;height:0;">
+            <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#34c759;border-radius:14px;transition:0.3s;"></span>
+            <span id="tgNotifySlider" style="position:absolute;cursor:pointer;top:2px;left:22px;width:24px;height:24px;background:white;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+          </label>
+        </div>
+      </div>
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <button id="clearAllChatsBtn" style="background:var(--ios-red);color:white;border:none;padding:10px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;width:100%;font-family:inherit;">Clear All Chats</button>
+      </div>
+      <div id="settingsStatus" style="font-size:12px;color:var(--ios-subtext);padding:4px;text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" data-tab="pageChat">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="13" x2="15" y2="13"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="tab-item" data-tab="pageBroadcast">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Broadcast</span>
+    </button>
+    <button class="tab-item" data-tab="pageStats">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Stats</span>
+    </button>
+    <button class="tab-item" data-tab="pageSettings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span>Settings</span>
+    </button>
   </div>
 
 
