@@ -119,7 +119,23 @@ function switchTab(tabId) {
   }
 }
 
-// ====================== STATS ======================
+// ====================== STATS (iOS-style) ======================
+function animateNumber(el, target, duration) {
+  if (!el) return;
+  var start = parseInt(el.textContent) || 0;
+  if (start === target) return;
+  var startTime = null;
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var progress = Math.min((timestamp - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = Math.round(start + (target - start) * eased);
+    el.textContent = current;
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 function refreshStats() {
   if (!users) return;
   var total = users.length;
@@ -130,23 +146,87 @@ function refreshStats() {
     if (!u.createdAt || !u.createdAt.toDate) return false;
     return (now - u.createdAt.toDate().getTime()) < 86400000;
   }).length;
+  var offline = total - online;
 
-  document.getElementById('statTotalUsers').textContent = total;
-  document.getElementById('statOnlineUsers').textContent = online;
-  document.getElementById('statBlockedUsers').textContent = blocked;
-  document.getElementById('statNewToday').textContent = newToday;
+  // Animated counters
+  animateNumber(document.getElementById('statTotalUsers'), total, 600);
+  animateNumber(document.getElementById('statOnlineUsers'), online, 600);
+  animateNumber(document.getElementById('statBlockedUsers'), blocked, 600);
+  animateNumber(document.getElementById('statNewToday'), newToday, 600);
 
+  // Last updated timestamp
+  document.getElementById('statsUpdatedAt').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Activity bar
+  var onlinePct = total > 0 ? (online / total * 100) : 0;
+  document.getElementById('statOnlineBar').style.width = onlinePct + '%';
+  document.getElementById('statOfflineBar').style.width = (100 - onlinePct) + '%';
+  document.getElementById('statRatioText').textContent = Math.round(onlinePct) + '% online';
+  document.getElementById('statOnlineLabel').textContent = online + ' online';
+  document.getElementById('statOfflineLabel').textContent = offline + ' offline';
+
+  // Languages
+  var langCounts = {};
+  users.forEach(function(u) {
+    var lang = u.language || 'Unknown';
+    lang = lang.charAt(0).toUpperCase() + lang.slice(1);
+    langCounts[lang] = (langCounts[lang] || 0) + 1;
+  });
+  var langEntries = Object.entries(langCounts).sort(function(a, b) { return b[1] - a[1]; });
+  var langEl = document.getElementById('statLanguages');
+  if (langEntries.length === 0) {
+    langEl.innerHTML = '<div style="font-size:13px;color:var(--ios-subtext);">No data</div>';
+  } else {
+    var maxCount = langEntries[0][1];
+    langEl.innerHTML = langEntries.map(function(entry) {
+      var pct = maxCount > 0 ? (entry[1] / maxCount * 100) : 0;
+      return '<div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:2px;">' +
+        '<span>' + entry[0] + '</span>' +
+        '<span style="color:var(--ios-subtext);">' + entry[1] + '</span>' +
+        '</div>' +
+        '<div style="height:4px;background:var(--ios-bg);border-radius:2px;overflow:hidden;">' +
+        '<div style="height:100%;background:var(--ios-blue);border-radius:2px;width:' + pct + '%;transition:width 0.6s ease;"></div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Recent Users (iOS-style)
   var recentEl = document.getElementById('recentUsersList');
   var recent = users.slice(0, 10);
-  recentEl.innerHTML = recent.map(function(u) {
-    var name = u.userName || u.name || 'User #' + (u.assignedId || '?');
-    var active = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
-    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--ios-separator);">' +
-      '<span>' + name + '</span>' +
-      '<span style="color:var(--ios-subtext);font-size:11px;">' + active + '</span></div>';
-  }).join('');
-  if (recent.length === 0) recentEl.innerHTML = '<div style="padding:12px 0;color:var(--ios-subtext);text-align:center;">No users yet</div>';
+  if (recent.length === 0) {
+    recentEl.innerHTML = '<div style="padding:16px 0;color:var(--ios-subtext);text-align:center;font-size:14px;">No users yet</div>';
+  } else {
+    recentEl.innerHTML = recent.map(function(u) {
+      var name = u.userName || u.name || 'User #' + (u.assignedId || '?');
+      var active = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
+      var isOnline = u.online === true;
+      var initial = (u.userName || u.name || '?')[0].toUpperCase();
+      var color = getAvatarColor(u.assignedId || 1);
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--ios-separator);">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:' + color + ';color:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;position:relative;">' +
+        initial +
+        '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid white;background:' + (isOnline ? 'var(--ios-green)' : 'var(--ios-dark-gray)') + ';"></span>' +
+        '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>' +
+        '<div style="font-size:11px;color:var(--ios-subtext);">' + (u.language || '') + (u.language && u.categoryLabel ? ' · ' : '') + (u.categoryLabel || '') + '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--ios-subtext);flex-shrink:0;">' + active + '</div>' +
+        '</div>';
+    }).join('');
+  }
 }
+
+// Stats refresh button
+document.getElementById('statsRefreshBtn').addEventListener('click', function() {
+  var svg = this.querySelector('svg');
+  svg.style.transition = 'transform 0.5s ease';
+  svg.style.transform = 'rotate(360deg)';
+  refreshStats();
+  setTimeout(function() { svg.style.transform = 'rotate(0deg)'; }, 500);
+});
 
 // ====================== SETTINGS ======================
 var autoReplyToggle = document.getElementById('autoReplyToggle');
