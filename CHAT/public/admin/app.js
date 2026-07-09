@@ -192,18 +192,18 @@ function refreshStats() {
     }).join('');
   }
 
-  // Recent Users (clean & minimal)
+  // Recent Users
   var recentEl = document.getElementById('recentUsersList');
   var recent = users.slice(0, 10);
   if (recent.length === 0) {
     recentEl.innerHTML = '<div style="padding:16px 0;color:var(--ios-subtext);text-align:center;font-size:14px;">No users yet</div>';
   } else {
     recentEl.innerHTML = recent.map(function(u) {
-      var name = u.userName || u.name || 'User';
-      var uid = '#' + (u.assignedId || '?');
+      var name = u.userName || u.name || 'User #' + (u.assignedId || '?');
+      var active = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
       return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--ios-separator);">' +
         '<span style="font-size:15px;font-weight:500;">' + name + '</span>' +
-        '<span style="font-size:13px;color:var(--ios-subtext);font-weight:500;">' + uid + '</span>' +
+        '<span style="font-size:12px;color:var(--ios-subtext);">' + active + '</span>' +
         '</div>';
     }).join('');
   }
@@ -368,34 +368,18 @@ function renderUserList(filter = '') {
     item.dataset.userId = u.id;
 
     const displayName = u.userName || u.name || `User #${u.assignedId || '?'}`;
-    const lastMsg = u.lastMessage || 'No messages yet';
-    const lastActive = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
-    const isOnline = u.online === true;
-    const isNew = u.createdAt && u.createdAt.toDate ? (Date.now() - u.createdAt.toDate().getTime()) < NEW_USER_HOURS * 3600000 : false;
-    const isBlocked = u.blocked === true;
     const hasUnread = unreadUsers.has(u.id);
 
-    var catHtml = u.categoryLabel ? `<span style="color:#22c55e;font-size:11px;">${u.categoryLabel}</span>` : '';
-    var langHtml = u.language ? `<span style="color:#ff9f43;font-size:11px;">${u.language.charAt(0).toUpperCase() + u.language.slice(1)}</span>` : '';
-    var uidHtml = u.quotexUid ? `<span style="color:#8e8e93;font-size:11px;">UID: ${u.quotexUid}</span>` : '';
-    var unreadDotHtml = hasUnread ? '<span class="unread-dot"></span>' : '';
+    var uidLabel = '#' + (u.assignedId || '?');
 
-    item.innerHTML = `
-      <div class="user-avatar" style="${u.logo ? '' : `background: ${getAvatarColor(u.assignedId || 1)}`}">
-        ${u.logo ? `<img src="${u.logo}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : displayName[0]}
-        <span class="online-indicator ${isOnline ? 'online' : 'offline'}"></span>
-      </div>
-      <div class="user-info">
-        <div class="user-name">
-          #${u.assignedId || '?'} ${u.userName ? '- ' + u.userName : ''}
-          ${isNew ? '<span class="badge new">NEW</span>' : ''}
-          ${isBlocked ? '<span class="badge blocked">BLOCKED</span>' : ''}
-        </div>
-        <div class="user-email">${catHtml} ${langHtml} ${uidHtml} ${unreadDotHtml}</div>
-        <div class="user-preview">${lastMsg}</div>
-      </div>
-      <div class="user-time">${lastActive}</div>
-    `;
+    item.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;width:100%;">' +
+        '<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">' +
+          (hasUnread ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--ios-blue);flex-shrink:0;"></span>' : '') +
+          '<span style="font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + displayName + '</span>' +
+        '</div>' +
+        '<span style="font-size:13px;color:var(--ios-subtext);font-weight:500;flex-shrink:0;margin-left:8px;">' + uidLabel + '</span>' +
+      '</div>';
 
     item.addEventListener('click', () => selectUser(u.id));
     userListEl.appendChild(item);
