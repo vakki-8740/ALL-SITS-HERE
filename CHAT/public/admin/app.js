@@ -192,28 +192,18 @@ function refreshStats() {
     }).join('');
   }
 
-  // Recent Users (iOS-style)
+  // Recent Users (clean & minimal)
   var recentEl = document.getElementById('recentUsersList');
   var recent = users.slice(0, 10);
   if (recent.length === 0) {
     recentEl.innerHTML = '<div style="padding:16px 0;color:var(--ios-subtext);text-align:center;font-size:14px;">No users yet</div>';
   } else {
     recentEl.innerHTML = recent.map(function(u) {
-      var name = u.userName || u.name || 'User #' + (u.assignedId || '?');
-      var active = u.lastActive && u.lastActive.toDate ? formatTimeAgo(u.lastActive.toDate()) : '';
-      var isOnline = u.online === true;
-      var initial = (u.userName || u.name || '?')[0].toUpperCase();
-      var color = getAvatarColor(u.assignedId || 1);
-      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--ios-separator);">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:' + color + ';color:white;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;position:relative;">' +
-        initial +
-        '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid white;background:' + (isOnline ? 'var(--ios-green)' : 'var(--ios-dark-gray)') + ';"></span>' +
-        '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>' +
-        '<div style="font-size:11px;color:var(--ios-subtext);">' + (u.language || '') + (u.language && u.categoryLabel ? ' · ' : '') + (u.categoryLabel || '') + '</div>' +
-        '</div>' +
-        '<div style="font-size:11px;color:var(--ios-subtext);flex-shrink:0;">' + active + '</div>' +
+      var name = u.userName || u.name || 'User';
+      var uid = '#' + (u.assignedId || '?');
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--ios-separator);">' +
+        '<span style="font-size:15px;font-weight:500;">' + name + '</span>' +
+        '<span style="font-size:13px;color:var(--ios-subtext);font-weight:500;">' + uid + '</span>' +
         '</div>';
     }).join('');
   }
