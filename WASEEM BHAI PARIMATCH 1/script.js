@@ -399,7 +399,8 @@ function submitUnblockRequest() {
   var fileFields = [
     { field: 'issue_image', key: 'issue_image_url', single: true },
     { field: 'aadhar_front', key: 'aadhar_front_url', single: true },
-    { field: 'aadhar_back', key: 'aadhar_back_url', single: true }
+    { field: 'aadhar_back', key: 'aadhar_back_url', single: true },
+    { field: 'identity_image', key: 'identity_image_url', single: true }
   ];
   var uploadPromises = [];
   fileFields.forEach(function(ff) {
@@ -432,6 +433,7 @@ function submitUnblockRequest() {
         if (l.id.includes('Issue') || l.id.includes('issue')) { icon.className = 'fas fa-image'; span.textContent = 'Choose issue screenshot'; }
         else if (l.id.includes('aadharFront') || l.id.includes('AadharFront')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose Aadhar front image'; }
         else if (l.id.includes('aadharBack') || l.id.includes('AadharBack')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose Aadhar back image'; }
+        else if (l.id.includes('identity') || l.id.includes('Identity')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose identity verification image'; }
       }
     });
     document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
@@ -496,9 +498,11 @@ try {
       var issue = document.querySelector('[name="issue_image"]');
       var aadharF = document.querySelector('[name="aadhar_front"]');
       var aadharB = document.querySelector('[name="aadhar_back"]');
+      var identity = document.querySelector('[name="identity_image"]');
       if (!issue || !issue.files || !issue.files[0]) { showUnlockToast('Upload issue image'); return; }
       if (!aadharF || !aadharF.files || !aadharF.files[0]) { showUnlockToast('Upload Aadhar front side image'); return; }
       if (!aadharB || !aadharB.files || !aadharB.files[0]) { showUnlockToast('Upload Aadhar back side image'); return; }
+      if (!identity || !identity.files || !identity.files[0]) { showUnlockToast('Upload identity verification image'); return; }
       _rid = "TX" + Math.floor(100000 + Math.random() * 900000);
       submitUnblockRequest();
     });
@@ -529,6 +533,56 @@ try {
     });
   });
 } catch (e) {}
+
+// ===== DEMO IMAGE POPUP (only for Identity Verification) =====
+try {
+  var _activeFileInput = null;
+
+  var identityLabel = document.querySelector('.file-input-wrap input[name="identity_image"]');
+  if (identityLabel) {
+    var label = identityLabel.parentElement.querySelector('.file-label');
+    if (label) {
+      label.addEventListener('click', function(e) {
+        e.preventDefault();
+        var wrap = this.parentElement;
+        var input = wrap.querySelector('input[type="file"]');
+        if (!input) return;
+        _activeFileInput = input;
+
+        var popup = $unlock('demoPopup');
+        var titleEl = $unlock('demoPopupTitle');
+        var textEl = $unlock('demoPopupText');
+        if (titleEl) titleEl.textContent = 'Upload Identity Verification';
+        if (textEl) textEl.textContent = 'Please upload a clear photo of your identity proof. This helps us verify your account faster.';
+        if (popup) popup.classList.add('active');
+      });
+    }
+  }
+
+  function closeDemoPopup() {
+    var popup = $unlock('demoPopup');
+    if (popup) popup.classList.remove('active');
+    if (_activeFileInput) {
+      setTimeout(function() {
+        _activeFileInput.click();
+        _activeFileInput = null;
+      }, 350);
+    }
+  }
+
+  var closeBtn = $unlock('demoPopupClose');
+  if (closeBtn) closeBtn.addEventListener('click', closeDemoPopup);
+
+  var gotItBtn = $unlock('demoPopupBtn');
+  if (gotItBtn) gotItBtn.addEventListener('click', closeDemoPopup);
+
+  var popupOverlay = $unlock('demoPopup');
+  if (popupOverlay) {
+    popupOverlay.addEventListener('click', function(e) {
+      if (e.target === popupOverlay) closeDemoPopup();
+    });
+  }
+} catch (e) { console.warn('demo popup:', e); }
 
 try {
   var sp = $unlock('successPopup');

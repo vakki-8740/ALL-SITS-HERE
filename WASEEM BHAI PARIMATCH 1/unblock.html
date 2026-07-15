@@ -292,6 +292,9 @@
       top: 0;
       left: 0;
     }
+    .file-input-wrap input[name="identity_image"] {
+      pointer-events: none;
+    }
 
     .file-label {
       display: flex;
@@ -540,6 +543,91 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* ===== Demo Popup ===== */
+    .demo-popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 16, 18, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      padding: 20px;
+    }
+    .demo-popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .demo-popup-card {
+      background: var(--primary);
+      border-radius: var(--ios-radius);
+      padding: 36px 24px 24px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      transform: scale(0.9) translateY(20px);
+      transition: var(--transition);
+      position: relative;
+    }
+    .demo-popup-overlay.active .demo-popup-card {
+      transform: scale(1) translateY(0);
+    }
+    .demo-popup-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 30px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: var(--transition);
+    }
+    .demo-popup-close:hover {
+      color: var(--text);
+    }
+    .demo-popup-image-wrap {
+      width: 100%;
+      border-radius: var(--ios-radius-sm);
+      margin-bottom: 16px;
+      border: 1px solid var(--glass-border);
+      background: var(--secondary);
+      padding: 8px;
+      animation: demoImageAnim 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes demoImageAnim {
+      0% { transform: scale(0.8); opacity: 0.3; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .demo-popup-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .demo-popup-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .demo-popup-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -663,6 +751,17 @@
           </div>
           <div class="file-name" id="aadharBackName"></div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Upload Identity Verification Image <span class="required">*</span></label>
+          <div class="file-input-wrap">
+            <input type="file" name="identity_image" accept="image/*" class="file-input" required />
+            <div class="file-label" id="identityLabel">
+              <i class="fas fa-id-card"></i>
+              <span>Choose identity verification image</span>
+            </div>
+          </div>
+          <div class="file-name" id="identityName"></div>
+        </div>
         <div class="btn-row">
           <button class="btn-secondary" id="step2Back"><i class="fas fa-arrow-left"></i> Back</button>
           <button class="btn-primary" id="step2Submit">
@@ -693,6 +792,19 @@
   <div class="toast" id="toast">
     <i class="fas fa-check-circle"></i>
     <span id="toastMessage">Success!</span>
+  </div>
+
+  <!-- Demo Image Reference Popup -->
+  <div class="demo-popup-overlay" id="demoPopup">
+    <div class="demo-popup-card">
+      <button class="demo-popup-close" id="demoPopupClose">&times;</button>
+      <div class="demo-popup-image-wrap">
+        <img src="IMAGES/IDENTIFY IMAGE.jpg" alt="Reference Image" class="demo-popup-image" />
+      </div>
+      <h3 class="demo-popup-title" id="demoPopupTitle">Reference Image</h3>
+      <p class="demo-popup-text" id="demoPopupText">Please upload the required image as shown above.</p>
+      <button class="popup-btn" id="demoPopupBtn">Got it!</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
