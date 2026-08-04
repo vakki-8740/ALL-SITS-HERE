@@ -142,14 +142,16 @@ const fmtRel = ts => {
   return fmtTime(ts);
 };
 const isPwd = k => /password|passwd|pwd|secret|pin/i.test(k);
+const statusCls = s => { const v = String(s||'').toLowerCase(); if (v.includes('approved')||v.includes('resolved')||v.includes('success')) return 'approved'; if (v.includes('rejected')||v.includes('failed')||v.includes('cancelled')) return 'rejected'; if (v.includes('pending')) return 'pending'; return 'other'; };
+const renderStatusBadge = s => `<span class="status-badge ${statusCls(s)}"><i class="fa-solid ${statusCls(s)==='approved'?'fa-circle-check':statusCls(s)==='rejected'?'fa-circle-xmark':statusCls(s)==='pending'?'fa-clock':'fa-circle-question'}"></i> ${esc(s)}</span>`;
 const getEvent = d => {
   if (d.event) return d.event;
-  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; }
+  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; }
   return 'other';
 };
-const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : d.type || 'Other'; };
-const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : 'badge-type-other';
-const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : 'fa-circle-question';
+const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'verification' ? 'Email Verification' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : d.type || 'Other'; };
+const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'verification' ? 'badge-type-verification' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : 'badge-type-other';
+const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'verification' ? 'fa-envelope-circle-check' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : 'fa-circle-question';
 const copyText = t => { navigator.clipboard?.writeText(t).then(() => toast('Copied')); };
 
 let toastT;
@@ -264,7 +266,7 @@ function applyFilters(list) {
     if (state.filter.site !== 'all' && s.site_id !== state.filter.site) return false;
     if (state.filter.type !== 'all' && getEvent(s) !== state.filter.type) return false;
     if (q) {
-      const hay = [s.email,s.mobile,s.login_id,s.user_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
+      const hay = [s.email,s.mobile,s.login_id,s.user_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.username,s.uid,s.verify_email,s.verify_value,s.verify_method,s.issue_type,s.status,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -384,12 +386,13 @@ function renderSpark(container) {
 function renderMix(container) {
   const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate()-7);
   const in7d = state.allSubs.filter(s => { const dt = toDate(s.created_at); return dt && dt >= startOfWeek; });
-  const mix = { login:0, deposit:0, withdrawal:0, unblock:0, bonus:0, other:0 };
+  const mix = { login:0, deposit:0, withdrawal:0, verification:0, unblock:0, bonus:0, other:0 };
   in7d.forEach(s => { mix[getEvent(s)]++; });
   container.innerHTML = `
     <span class="mix-chip deposit"><i class="fa-solid fa-dollar-sign"></i> Deposits <strong>${mix.deposit}</strong></span>
     <span class="mix-chip withdrawal"><i class="fa-solid fa-money-bill-transfer"></i> Withdrawals <strong>${mix.withdrawal}</strong></span>
     <span class="mix-chip login"><i class="fa-solid fa-lock"></i> Logins <strong>${mix.login}</strong></span>
+    <span class="mix-chip verification"><i class="fa-solid fa-envelope-circle-check"></i> Email Verifies <strong>${mix.verification}</strong></span>
     <span class="mix-chip unblock"><i class="fa-solid fa-unlock"></i> Unlock Withdrawals <strong>${mix.unblock}</strong></span>
     <span class="mix-chip bonus"><i class="fa-solid fa-gift"></i> Bonus Problems <strong>${mix.bonus}</strong></span>
     <span class="mix-chip other"><i class="fa-solid fa-circle-question"></i> Other <strong>${mix.other}</strong></span>`;
@@ -452,6 +455,7 @@ function renderList() {
     Object.keys(s).forEach(k => {
       if (skip.has(k)) return;
       const v = s[k]; if (v===null||v===undefined||v===''||v==='N/A') return;
+      if (k === 'status') { fields.push(`<div class="field"><div class="field-label">${esc(k.replace(/_/g,' '))}</div><div class="field-value">${renderStatusBadge(v)}</div></div>`); return; }
       fields.push(`<div class="field"><div class="field-label">${esc(k.replace(/_/g,' '))}</div><div class="field-value">${renderFieldValue(v, k)}</div></div>`);
     });
 
@@ -507,7 +511,9 @@ function openModal(sub) {
     const v = sub[k]; if (v===null||v===undefined||v===''||v==='N/A') return;
     let display = v; if (k==='created_at'&&v?.toDate) display = v.toDate().toLocaleString();
     let valueHTML;
-    if (k!=='created_at' && isImageUrl(String(v))) {
+    if (k==='status') {
+      valueHTML = `<div class="modal-field-value">${renderStatusBadge(v)}</div>`;
+    } else if (k!=='created_at' && isImageUrl(String(v))) {
       valueHTML = `<div class="modal-img-wrap"><img src="${esc(String(v))}" alt="${esc(k)}" loading="lazy" onclick="openImagePreview('${esc(String(v))}')" /><button class="img-copy-btn" onclick="event.stopPropagation();copyText('${esc(String(v))}')"><i class="fa-regular fa-copy"></i></button></div>`;
     } else {
       const pwd = isPwd(k);
@@ -523,7 +529,7 @@ function openModal(sub) {
 function exportCSV(data, tag) {
   const keysSet = new Set(); data.forEach(d => Object.keys(d).forEach(k => keysSet.add(k)));
   const keys = Array.from(keysSet);
-  const priority = ['created_at','site_id','event','type','email','mobile','login_id','user_id','amount','utr','withdraw_method','request_id','gameid','game_id','description','status','id'];
+  const priority = ['created_at','site_id','event','type','issue_type','email','mobile','login_id','user_id','username','uid','amount','utr','withdraw_method','verify_method','verify_value','verify_email','request_id','gameid','game_id','description','status','id'];
   keys.sort((a,b) => { const ia=priority.indexOf(a),ib=priority.indexOf(b); if(ia===-1&&ib===-1)return a.localeCompare(b); if(ia===-1)return 1; if(ib===-1)return -1; return ia-ib; });
   const e = v => { if(v==null)return''; let s=(v?.toDate)?v.toDate().toISOString():String(v); s=s.replace(/"/g,'""'); return s.search(/[",\n]/)>=0?'"'+s+'"':s; };
   const csv = '\uFEFF'+keys.join(',')+'\n'+data.map(d=>keys.map(k=>e(d[k])).join(',')).join('\n');

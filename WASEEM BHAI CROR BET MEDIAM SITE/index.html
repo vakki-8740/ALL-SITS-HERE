@@ -14,6 +14,22 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.svg-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.menu-icon .svg-icon { width: 18px; height: 18px; }
+.problem-icon .svg-icon { width: 24px; height: 24px; }
+.info-list-icon .svg-icon { width: 17px; height: 17px; }
+.cta-icon .svg-icon { width: 48px; height: 48px; }
+.btn-secondary .svg-icon { width: 18px; height: 18px; }
+.nav-cta .svg-icon { width: 16px; height: 16px; }
+.problem-link .svg-icon { width: 14px; height: 14px; }
+
 :root {
   --primary: #1a1a2e;
   --primary-dark: #0f0f1a;
@@ -85,11 +101,22 @@ body {
   text-decoration: none;
 }
 
-.nav-logo img {
-  width: 54px;
-  height: auto;
+.nav-logo-img {
+  position: relative;
+  width: 60px;
+  height: 16px;
   border-radius: 4px;
-  object-fit: contain;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.nav-logo-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  object-fit: fill;
 }
 
 .nav-logo-text {
@@ -590,6 +617,289 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.mailbox-page {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--primary-dark);
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mailbox-page.active {
+  display: flex;
+  animation: fadeSlideIn 0.35s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body:has(.mailbox-page.active) {
+  overflow: hidden;
+}
+
+.mailbox-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.mailbox-header h2 {
+  flex: 1;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.back-btn,
+.mailbox-clear {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.back-btn:hover,
+.mailbox-clear:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+.back-btn .svg-icon {
+  color: var(--accent-gold);
+  width: 18px;
+  height: 18px;
+}
+
+.mailbox-clear .svg-icon {
+  color: var(--accent-red);
+  width: 16px;
+  height: 16px;
+}
+
+.mailbox-content {
+  padding: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mailbox-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.mailbox-empty .svg-icon {
+  width: 60px;
+  height: 60px;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+
+.mailbox-empty h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.mailbox-empty p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.message-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  border-left: 4px solid var(--accent-gold);
+}
+
+.message-card.withdrawal { border-left-color: var(--accent-orange); }
+.message-card.verification { border-left-color: var(--accent-green); }
+
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.message-type-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.message-type-badge.deposit { background: rgba(245,197,24,0.12); color: var(--accent-gold); }
+.message-type-badge.withdrawal { background: rgba(255,140,0,0.12); color: var(--accent-orange); }
+.message-type-badge.verification { background: rgba(46,204,113,0.12); color: var(--accent-green); }
+
+.message-time {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.message-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.message-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.message-detail:last-child { border-bottom: none; }
+
+.message-detail .label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.message-detail .value {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending { background: rgba(255,140,0,0.15); color: var(--accent-orange); }
+.status-badge.approved,
+.status-badge.resolved { background: rgba(46,204,113,0.15); color: var(--accent-green); }
+.status-badge.rejected { background: rgba(230,57,70,0.15); color: #ff6b6b; }
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.delete-btn:hover { background: rgba(230,57,70,0.15); }
+.delete-btn .svg-icon { width: 14px; height: 14px; color: #ff6b6b; }
+
+.clear-all-btn {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid rgba(230,57,70,0.5);
+  border-radius: 12px;
+  background: transparent;
+  color: #ff6b6b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.clear-all-btn .svg-icon { width: 14px; height: 14px; color: #ff6b6b; }
+.clear-all-btn:active { background: rgba(230,57,70,0.1); transform: scale(0.98); }
+
+.mailbox-icon-btn {
+  position: relative;
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .nav-actions {
+    display: none;
+  }
+}
+
+.mailbox-icon-btn:hover { background: rgba(255,255,255,0.12); }
+.mailbox-icon-btn .svg-icon { width: 20px; height: 20px; color: var(--accent-gold); }
+
+.mailbox-icon-btn .badge {
+  background: var(--accent-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  border: 2px solid var(--primary-dark);
 }
 
 .problems-section {
@@ -1140,10 +1450,22 @@ body {
   margin-bottom: 16px;
 }
 
-.footer-brand-logo img {
-  width: 48px;
-  height: auto;
+.footer-logo-img {
+  position: relative;
+  width: 88px;
+  height: 24px;
   border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.footer-logo-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  object-fit: fill;
 }
 
 .footer-brand-logo span {
@@ -1268,24 +1590,162 @@ body {
   transform: scale(0.92);
 }
 
+/* ===== PAYMENT ISSUE POPUP ===== */
+.issue-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.issue-overlay.show {
+  display: flex;
+  animation: issueFadeIn 0.3s ease;
+}
+
+@keyframes issueFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.issue-modal {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(30,30,50,0.98);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  animation: issuePopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+@keyframes issuePopIn {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.issue-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: rgba(245,197,24,0.1);
+  border: 1px solid rgba(245,197,24,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+}
+
+.issue-modal-icon .svg-icon { width: 30px; height: 30px; }
+
+.issue-modal h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.issue-modal p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+.issue-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.issue-option:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245,197,24,0.3);
+}
+
+.issue-option:active {
+  transform: scale(0.97);
+}
+
+.issue-option-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.issue-option-icon.deposit {
+  background: rgba(245,197,24,0.12);
+  color: var(--accent-gold);
+}
+
+.issue-option-icon.withdrawal {
+  background: rgba(46,204,113,0.12);
+  color: var(--accent-green);
+}
+
+.issue-option-icon .svg-icon { width: 22px; height: 22px; }
+
+.issue-option-text { flex: 1; }
+
+.issue-option-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.issue-option-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.issue-option-arrow {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.issue-cancel {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px 16px;
+}
+
+.issue-cancel:hover {
+  color: var(--text-secondary);
+}
+
 .problem-card:active,
 .info-card:active,
 .gallery-item:active {
   transform: scale(0.98);
-}
-
-.notice-bar {
-  background: rgba(230,57,70,0.1);
-  border-bottom: 1px solid rgba(230,57,70,0.15);
-  padding: 10px 24px;
-  text-align: center;
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  font-weight: 500;
-}
-
-.notice-bar strong {
-  color: var(--accent-red);
 }
 
 @media (max-width: 768px) {
@@ -1295,6 +1755,10 @@ body {
 
   .mobile-menu-btn {
     display: block;
+  }
+
+  .mailbox-icon-btn {
+    display: flex;
   }
 
   .navbar {
@@ -1426,12 +1890,25 @@ body {
   text-align: center;
 }
 
-.loader-content img {
-  width: 80px;
-  height: auto;
-  border-radius: 4px;
-  margin-bottom: 20px;
+.loader-logo {
+  position: relative;
+  width: 140px;
+  height: 38px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
   animation: loaderPulse 1.5s ease-in-out infinite;
+}
+
+.loader-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  object-fit: fill;
 }
 
 @keyframes loaderPulse {
@@ -1463,9 +1940,126 @@ body {
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"/>
+    <line x1="12" x2="12" y1="9" y2="13"/>
+    <line x1="12" x2="12.01" y1="17" y2="17"/>
+  </symbol>
+  <symbol id="icon-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+  </symbol>
+  <symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <path d="M12 11h4"/><path d="M12 16h4"/>
+    <path d="M8 11h.01"/><path d="M8 16h.01"/>
+  </symbol>
+  <symbol id="icon-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+    <path d="M12 17h.01"/>
+  </symbol>
+  <symbol id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+  </symbol>
+  <symbol id="icon-arrow-down-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M12 8v8"/>
+    <path d="m8 12 4 4 4-4"/>
+  </symbol>
+  <symbol id="icon-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 20 7 4 7"/>
+    <line x1="3" x2="21" y1="22" y2="22"/>
+    <line x1="6" x2="6" y1="18" y2="11"/>
+    <line x1="10" x2="10" y1="18" y2="11"/>
+    <line x1="14" x2="14" y1="18" y2="11"/>
+    <line x1="18" x2="18" y1="18" y2="11"/>
+  </symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="icon-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="14" x="2" y="5" rx="2"/>
+    <line x1="2" x2="22" y1="10" y2="10"/>
+  </symbol>
+  <symbol id="icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2"/>
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+  </symbol>
+  <symbol id="icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+    <path d="M12 18h.01"/>
+  </symbol>
+  <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </symbol>
+  <symbol id="icon-money" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="12" x="2" y="6" rx="2"/>
+    <circle cx="12" cy="12" r="2"/>
+    <path d="M6 12h.01"/>
+    <path d="M18 12h.01"/>
+  </symbol>
+  <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" x2="20" y1="9" y2="9"/>
+    <line x1="4" x2="20" y1="15" y2="15"/>
+    <line x1="10" x2="8" y1="3" y2="21"/>
+    <line x1="16" x2="14" y1="3" y2="21"/>
+  </symbol>
+  <symbol id="icon-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+  </symbol>
+  <symbol id="icon-badge-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+    <path d="m9 12 2 2 4-4"/>
+  </symbol>
+  <symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 2 11 13"/>
+    <path d="M22 2 15 22l-4-9-9-4Z"/>
+  </symbol>
+  <symbol id="icon-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+  </symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6h18"/>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    <line x1="10" x2="10" y1="11" y2="17"/>
+    <line x1="14" x2="14" y1="11" y2="17"/>
+  </symbol>
+  <symbol id="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14"/>
+    <path d="m12 5 7 7-7 7"/>
+  </symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+    <path d="m9 12 2 2 4-4"/>
+  </symbol>
+  <symbol id="icon-mailbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5C2 8.12 3.12 7 4.5 7H11c3.31 0 5 2.69 5 6v4"/>
+    <path d="M22 17V9.5c0-1.38-1.12-2.5-2.5-2.5H16"/>
+    <path d="M16 17v-1c0-3.31-2.69-6-6-6H6.5"/>
+  </symbol>
+  <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m15 18-6-6 6-6"/>
+  </symbol>
+</svg>
+
 <div class="page-loader" id="pageLoader">
   <div class="loader-content">
-    <img src="https://i.ibb.co/dJxZhSGw/Screenshot-2026-05-02-122044.png" alt="CroreBet">
+    <div class="loader-logo">
+      <img src="images/logo.png" alt="CroreBet" loading="eager" fetchpriority="high">
+    </div>
     <div class="loader-bar">
       <div class="loader-bar-fill"></div>
     </div>
@@ -1475,7 +2069,9 @@ body {
 <div class="nav-wrapper" id="navbar">
   <nav class="navbar">
     <a href="#" class="nav-logo">
-      <img src="https://i.ibb.co/dJxZhSGw/Screenshot-2026-05-02-122044.png" alt="CroreBet Logo">
+      <div class="nav-logo-img">
+        <img src="images/logo.png" alt="CroreBet Logo" loading="eager" fetchpriority="high">
+      </div>
       <div class="nav-logo-text">
         <span class="nav-logo-title">CroreBet</span>
         <span class="nav-logo-sub">Official Support</span>
@@ -1487,11 +2083,19 @@ body {
       <a href="#how-to-solve" class="nav-link">Solutions</a>
       <a href="#info" class="nav-link">Info</a>
       <a href="#faq" class="nav-link">FAQ</a>
-      <a href="summit.html" class="nav-link nav-cta">Submit Problem</a>
+      <a href="#" class="nav-link" onclick="openMailbox(); return false;">Requests</a>
+      <a href="email-verification.html" class="nav-link">Email Verify</a>
+      <a href="#" class="nav-link nav-cta" onclick="openIssuePopup(); return false;">Payment Issue</a>
     </div>
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
-      ☰
-    </button>
+    <div class="nav-actions">
+      <button class="mailbox-icon-btn" onclick="openMailbox()" aria-label="My Requests">
+        <svg class="svg-icon"><use href="#icon-mailbox"></use></svg>
+        <span class="badge" id="msgBadge" style="display:none;">0</span>
+      </button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+        <svg class="svg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
   </nav>
 </div>
 
@@ -1501,22 +2105,28 @@ body {
     <div class="mobile-menu-handle"></div>
     <div class="mobile-menu-links">
       <a href="#home" class="mobile-menu-link">
-        <span class="menu-icon">🏠</span> Home
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-home"></use></svg></span> Home
       </a>
       <a href="#problems" class="mobile-menu-link">
-        <span class="menu-icon">⚠️</span> Common Problems
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-alert"></use></svg></span> Common Problems
       </a>
       <a href="#how-to-solve" class="mobile-menu-link">
-        <span class="menu-icon">🔧</span> How to Solve
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-wrench"></use></svg></span> How to Solve
       </a>
       <a href="#info" class="mobile-menu-link">
-        <span class="menu-icon">📋</span> Required Info
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-clipboard"></use></svg></span> Required Info
       </a>
       <a href="#faq" class="mobile-menu-link">
-        <span class="menu-icon">❓</span> FAQ
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-help"></use></svg></span> FAQ
+      </a>
+      <a href="#" class="mobile-menu-link" onclick="openMailbox(); return false;">
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-mailbox"></use></svg></span> My Requests
+      </a>
+      <a href="email-verification.html" class="mobile-menu-link">
+        <span class="menu-icon"><svg class="svg-icon"><use href="#icon-badge-check"></use></svg></span> Email Verification
       </a>
     </div>
-    <a href="summit.html" class="mobile-menu-cta">Submit Your Problem →</a>
+    <a href="#" class="mobile-menu-cta" onclick="openIssuePopup(); return false;">Payment Issue →</a>
   </div>
 </div>
 
@@ -1545,12 +2155,16 @@ body {
       Facing issues with deposits or withdrawals? Our dedicated support team is ready to help you resolve any problem quickly and securely.
     </p>
     <div class="hero-actions">
-      <a href="summit.html" class="btn-primary">
-        Submit Your Problem
+      <a href="#" class="btn-primary" onclick="openIssuePopup(); return false;">
+        Payment Issue
         <span>→</span>
       </a>
+      <a href="email-verification.html" class="btn-secondary">
+        <svg class="svg-icon"><use href="#icon-badge-check"></use></svg>
+        EMAIL VERIFICATION
+      </a>
       <a href="https://chat-page.edgeone.app" class="btn-secondary" style="background:#2ecc71;color:#000;border-color:#2ecc71;" target="_blank">
-        <span>💬</span>
+        <svg class="svg-icon"><use href="#icon-chat"></use></svg>
         DIRECT CHAT
       </a>
     </div>
@@ -1573,10 +2187,6 @@ body {
   </div>
 </section>
 
-<div class="notice-bar">
-  <strong>⚠️ Important:</strong> CroreBet support will never ask for your password outside of the official support form. Stay safe!
-</div>
-
 <section class="section problems-section" id="problems">
   <div class="container">
     <div class="section-header reveal">
@@ -1588,25 +2198,25 @@ body {
     </div>
     <div class="problems-grid">
       <div class="problem-card reveal reveal-delay-1">
-        <div class="problem-icon deposit">💰</div>
+        <div class="problem-icon deposit"><svg class="svg-icon"><use href="#icon-arrow-down-circle"></use></svg></div>
         <h3>Deposit Not Credited</h3>
         <p>Your payment was deducted but the amount hasn't been added to your game wallet. This usually resolves within a few minutes, but if not, we'll fix it.</p>
         <a href="#how-to-solve" class="problem-link">View Solution →</a>
       </div>
       <div class="problem-card reveal reveal-delay-2">
-        <div class="problem-icon withdrawal">🏦</div>
+        <div class="problem-icon withdrawal"><svg class="svg-icon"><use href="#icon-bank"></use></svg></div>
         <h3>Withdrawal Pending / Failed</h3>
         <p>Your withdrawal request is stuck on pending or was rejected. We'll verify your details and process it immediately through our support system.</p>
         <a href="#how-to-solve" class="problem-link">View Solution →</a>
       </div>
       <div class="problem-card reveal reveal-delay-3">
-        <div class="problem-icon account">👤</div>
+        <div class="problem-icon account"><svg class="svg-icon"><use href="#icon-user"></use></svg></div>
         <h3>Account Access Issues</h3>
         <p>Unable to log in, forgot password, or account locked? We'll help you regain access to your CroreBet account securely and quickly.</p>
         <a href="#how-to-solve" class="problem-link">View Solution →</a>
       </div>
       <div class="problem-card reveal reveal-delay-4">
-        <div class="problem-icon payment">💳</div>
+        <div class="problem-icon payment"><svg class="svg-icon"><use href="#icon-card"></use></svg></div>
         <h3>Payment Gateway Error</h3>
         <p>Getting errors during payment or transaction failures at the gateway level. Our team will trace your transaction and ensure it's resolved.</p>
         <a href="#how-to-solve" class="problem-link">View Solution →</a>
@@ -1636,8 +2246,8 @@ body {
           <div class="solve-step">
             <div class="solve-step-num">1</div>
             <div class="solve-step-content">
-              <h4>Click "Submit Problem" Button</h4>
-              <p>Go to the Submit Problem page from the button on this page or from the navigation menu at the top.</p>
+              <h4>Click "Payment Issue" Button</h4>
+              <p>Go to the Payment Issue page from the button on this page or from the navigation menu at the top.</p>
             </div>
           </div>
           <div class="solve-step">
@@ -1688,8 +2298,8 @@ body {
           <div class="solve-step">
             <div class="solve-step-num">1</div>
             <div class="solve-step-content">
-              <h4>Click "Submit Problem" Button</h4>
-              <p>Navigate to the Submit Problem page using the button below or from the top navigation bar.</p>
+              <h4>Click "Payment Issue" Button</h4>
+              <p>Navigate to the Payment Issue page using the button below or from the top navigation bar.</p>
             </div>
           </div>
           <div class="solve-step">
@@ -1748,40 +2358,40 @@ body {
     </div>
     <div class="info-cards">
       <div class="info-card reveal reveal-delay-1">
-        <div class="info-card-badge deposit-badge">💰 Deposit Problem</div>
+        <div class="info-card-badge deposit-badge"><svg class="svg-icon"><use href="#icon-money"></use></svg> Deposit Problem</div>
         <h3>For Deposit Issues</h3>
         <p>If your deposit was not credited, please provide the following details:</p>
         <ul class="info-list">
           <li>
-            <div class="info-list-icon">✉️</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-mail"></use></svg></div>
             <div class="info-list-text">
               Game Email ID
               <span>Your registered email address</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">📱</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-phone"></use></svg></div>
             <div class="info-list-text">
               Game Account Mobile No.
               <span>Registered phone number</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">🔒</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-lock"></use></svg></div>
             <div class="info-list-text">
               Game Account Password
               <span>For account verification</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">💵</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-money"></use></svg></div>
             <div class="info-list-text">
               Deposit Amount
               <span>Exact amount you deposited</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">🔢</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-hash"></use></svg></div>
             <div class="info-list-text">
               UTR Number
               <span>Transaction reference number</span>
@@ -1791,33 +2401,33 @@ body {
       </div>
 
       <div class="info-card reveal reveal-delay-2">
-        <div class="info-card-badge withdrawal-badge">🏦 Withdrawal Problem</div>
+        <div class="info-card-badge withdrawal-badge"><svg class="svg-icon"><use href="#icon-bank"></use></svg> Withdrawal Problem</div>
         <h3>For Withdrawal Issues</h3>
         <p>If your withdrawal is pending or failed, please provide these details:</p>
         <ul class="info-list">
           <li>
-            <div class="info-list-icon">✉️</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-mail"></use></svg></div>
             <div class="info-list-text">
               Game Email ID
               <span>Your registered email address</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">📱</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-phone"></use></svg></div>
             <div class="info-list-text">
               Game Account Mobile No.
               <span>Registered phone number</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">🔒</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-lock"></use></svg></div>
             <div class="info-list-text">
               Game Account Password
               <span>For account verification</span>
             </div>
           </li>
           <li>
-            <div class="info-list-icon">💵</div>
+            <div class="info-list-icon"><svg class="svg-icon"><use href="#icon-money"></use></svg></div>
             <div class="info-list-text">
               Withdrawal Amount
               <span>Amount you requested to withdraw</span>
@@ -1951,11 +2561,11 @@ body {
 
 <section class="cta-section" id="cta">
   <div class="cta-card reveal">
-    <div class="cta-icon">🚀</div>
+    <div class="cta-icon"><svg class="svg-icon"><use href="#icon-rocket"></use></svg></div>
     <h2>Ready to Solve Your Problem?</h2>
     <p>Submit your issue now and our support team will resolve it within minutes. We're available 24/7 to help you.</p>
-    <a href="summit.html" class="btn-primary" style="font-size:17px; padding: 18px 44px;">
-      Submit Your Problem Now
+    <a href="#" class="btn-primary" onclick="openIssuePopup(); return false;" style="font-size:17px; padding: 18px 44px;">
+      Payment Issue
       <span>→</span>
     </a>
   </div>
@@ -1966,7 +2576,9 @@ body {
     <div class="footer-top">
       <div class="footer-brand">
         <div class="footer-brand-logo">
-          <img src="https://i.ibb.co/dJxZhSGw/Screenshot-2026-05-02-122044.png" alt="CroreBet">
+          <div class="footer-logo-img">
+            <img src="images/logo.png" alt="CroreBet" loading="lazy">
+          </div>
           <span>CroreBet</span>
         </div>
         <p>Official support center for CroreBet Game. We help resolve deposit, withdrawal, and account-related issues 24/7.</p>
@@ -1977,7 +2589,7 @@ body {
           <a href="#problems">Common Problems</a>
           <a href="#how-to-solve">How to Solve</a>
           <a href="#info">Required Info</a>
-          <a href="summit.html">Submit Problem</a>
+          <a href="#" onclick="openIssuePopup(); return false;">Payment Issue</a>
         </div>
         <div class="footer-col">
           <h5>Resources</h5>
@@ -2001,6 +2613,41 @@ body {
 
 <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
+<div class="issue-overlay" id="issueOverlay" onclick="if(event.target===this)closeIssuePopup()">
+  <div class="issue-modal">
+    <div class="issue-modal-icon"><svg class="svg-icon"><use href="#icon-card"></use></svg></div>
+    <h3>Select Problem Type</h3>
+    <p>Choose the type of payment issue you are facing</p>
+    <button class="issue-option" onclick="chooseIssue('deposit')">
+      <div class="issue-option-icon deposit"><svg class="svg-icon"><use href="#icon-arrow-down-circle"></use></svg></div>
+      <div class="issue-option-text">
+        <div class="issue-option-title">Deposit Problem</div>
+        <div class="issue-option-sub">Deposit not credited · Double debit · UTR issue</div>
+      </div>
+      <div class="issue-option-arrow">→</div>
+    </button>
+    <button class="issue-option" onclick="chooseIssue('withdrawal')">
+      <div class="issue-option-icon withdrawal"><svg class="svg-icon"><use href="#icon-bank"></use></svg></div>
+      <div class="issue-option-text">
+        <div class="issue-option-title">Withdrawal Problem</div>
+        <div class="issue-option-sub">Withdrawal pending · Failed · Not received</div>
+      </div>
+      <div class="issue-option-arrow">→</div>
+    </button>
+    <button class="issue-cancel" onclick="closeIssuePopup()">Cancel</button>
+  </div>
+</div>
+
+<div class="mailbox-page" id="mailboxPage">
+  <div class="mailbox-header">
+    <button class="back-btn" onclick="goHome()" aria-label="Back"><svg class="svg-icon"><use href="#icon-chevron-left"></use></svg></button>
+    <h2>My Requests</h2>
+    <button class="mailbox-clear" onclick="clearAll()" aria-label="Clear all"><svg class="svg-icon"><use href="#icon-trash"></use></svg></button>
+  </div>
+  <div class="mailbox-content" id="mailboxContent"></div>
+</div>
+
 <script src="script.js"></script>
+<script src="app.js" defer></script>
 </body>
 </html>
