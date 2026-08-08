@@ -12,6 +12,8 @@ const TELEGRAM_BOT_TOKEN = '8853360102:AAERqOXQhrUnjvTHsVMIt_5bnVP1IdAWh6g';
 const TELEGRAM_CHANNEL_NEW_USER = '-1003980959944';
 const TELEGRAM_CHANNEL_ALL_MSGS = '-1003751648253';
 const TELEGRAM_CHANNEL_IMAGES = '-1004295631105';
+const TELEGRAM_BOT_TOKEN_FILES = '8956361328:AAFy-62gy7Ga2OBsqPu5s1bzxAmhAsPF_qU';
+const TELEGRAM_CHANNEL_FILES = '-1003839830299';
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -47,6 +49,8 @@ let quotexUidVal = localStorage.getItem('chat_quotex_uid') || '';
 let selectedLanguage = null;
 let selectedCategory = null;
 let selectedImageFile = null;
+let selectedFile = null;
+let typingDebounceTimer = null;
 let sessions = {};
 let activeSession = 'main';
 let categorySent = false;
@@ -154,6 +158,21 @@ async function uploadImageToTelegram(file) {
   return `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${fileData.result.file_path}`;
 }
 
+async function sendFileToTelegram(file) {
+  const formData = new FormData();
+  formData.append('chat_id', TELEGRAM_CHANNEL_FILES);
+  formData.append('document', file);
+  formData.append('caption', (userName || 'User') + (quotexUidVal ? ' (UID: ' + quotexUidVal + ')' : '') + ' | ' + file.name);
+  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN_FILES}/sendDocument`, { method: 'POST', body: formData });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.description);
+  const fileId = data.result.document.file_id;
+  const fileRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN_FILES}/getFile?file_id=${fileId}`);
+  const fileData = await fileRes.json();
+  if (!fileData.ok) throw new Error(fileData.description);
+  return `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN_FILES}/${fileData.result.file_path}`;
+}
+
 // ====================== LOGIN ======================
 async function handleLogin() {
   const name = loginName.value.trim();
@@ -217,6 +236,7 @@ async function handleLogin() {
       loadMessages();
       loadProfile();
       loginNextBtn.disabled = false;
+      enablePresence();
       if (!selectedLanguage) { showLangPopup(); }
       return;
     }
@@ -231,6 +251,7 @@ async function handleLogin() {
   }
   loadProfile();
   loginNextBtn.disabled = false;
+  enablePresence();
   if (!selectedLanguage) { showLangPopup(); }
 }
 
@@ -240,6 +261,56 @@ loginName.addEventListener('keydown', (e) => {
 loginUid.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !loginNextBtn.disabled) handleLogin();
 });
+
+function listenTyping() {
+  textInput.addEventListener('input', () => {
+    if (typingDebounceTimer) clearTimeout(typingDebounceTimer);
+    if (userId && !typingDebounceTimer) {
+      db.collection('chatUsers').doc(userId).update({ typing: true }).catch(function() {});
+    }
+    typingDebounceTimer = setTimeout(() => {
+      typingDebounceTimer = null;
+      if (userId) {
+        db.collection('chatUsers').doc(userId).update({ typing: false }).catch(function() {});
+      }
+    }, 2500);
+  });
+}
+
+function stopTyping() {
+  if (typingDebounceTimer) { clearTimeout(typingDebounceTimer); typingDebounceTimer = null; }
+  if (userId) db.collection('chatUsers').doc(userId).update({ typing: false }).catch(function() {});
+}
+
+function setOnlineStatus(status) {
+  if (!userId) return;
+  var payload = { online: status };
+  if (status) payload.lastActive = firebase.firestore.FieldValue.serverTimestamp();
+  db.collection('chatUsers').doc(userId).update(payload).catch(function() {});
+}
+
+function startOnlineHeartbeat() {
+  setOnlineStatus(true);
+  setInterval(function() {
+    if (!userId) return;
+    db.collection('chatUsers').doc(userId).update({
+      online: true,
+      lastActive: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(function() {});
+  }, 15000);
+}
+
+function enablePresence() {
+  listenTyping();
+  startOnlineHeartbeat();
+}
+
+function disablePresence() {
+  stopTyping();
+  if (userId) {
+    db.collection('chatUsers').doc(userId).update({ online: false }).catch(function() {});
+  }
+}
 
 // ====================== SETUP ======================
 async function setupUser() {
@@ -319,6 +390,7 @@ async function setupUser() {
     if (userName && quotexUidVal) {
       await db.collection('chatUsers').doc(userId).update({ userName: userName, quotexUid: quotexUidVal }).catch(function() {});
     }
+    enablePresence();
   } catch (e) {
     console.error('Setup error:', e);
     showToast('Error setting up chat. Refresh and try again.');
@@ -518,13 +590,47 @@ function handleCategoryPersistence() {
 async function sendMessage() {
   const text = textInput.value.trim();
   if (!chatId) return;
-  if (!text && !selectedImageFile) return;
+  if (!text && !selectedImageFile && !selectedFile) return;
 
   sendBtn.disabled = true;
+  stopTyping();
 
   let imageUrl = null;
 
   try {
+    if (selectedFile) {
+      const fileName = selectedFile.name;
+      showFileSendingBubble(fileName);
+      const telegramFileUrl = await sendFileToTelegram(selectedFile);
+      await db.collection('chatMessages').doc(chatId).collection('messages').add({
+        sender: 'user',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        deleted: false,
+        sessionId: activeSession !== 'main' ? activeSession : null,
+        fileName: fileName,
+        fileUrl: telegramFileUrl
+      });
+      await db.collection('chatUsers').doc(userId).update({
+        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+        lastMessage: '(File) ' + fileName,
+        activeSession: activeSession
+      }).catch(function() {});
+      await db.collection('chatSessions').doc(userId).collection('sessions').doc(activeSession).update({
+        lastMessage: '(File) ' + fileName,
+        order: Date.now()
+      }).catch(function() {});
+      removeFileSendingBubble();
+      removeSelectedFile();
+      textInput.value = '';
+      textInput.style.height = 'auto';
+      updateSendButton();
+      autoResizeTextarea();
+      showFileSentPopup(fileName);
+      sendBtn.disabled = false;
+      textInput.focus();
+      return;
+    }
+
     if (selectedImageFile) {
       showToast('Uploading image...');
       imageUrl = await uploadImageToTelegram(selectedImageFile);
@@ -641,6 +747,10 @@ function loadMessages() {
           if (data.isCategoryTag) existing.classList.add('cat-tag');
           if (data.isAutoReply) existing.classList.add('auto-reply');
           var inner = '';
+          if (data.fileName) {
+            var isPdf = /\.pdf$/i.test(data.fileName);
+            inner += '<div class="file-bubble"><div class="file-ico">' + (isPdf ? 'PDF' : 'FILE') + '</div><div class="file-meta"><div class="file-name">' + escapeHtml(data.fileName) + '</div><div class="file-status"><span class="sent-check">✓</span><span class="send-label">Sent</span></div></div></div>';
+          }
           if (data.imageUrl) inner += '<img src="' + data.imageUrl + '" alt="image" loading="lazy">';
           if (data.text) inner += data.text;
           var ts = data.timestamp && data.timestamp.toDate ? formatTime(data.timestamp.toDate()) : 'now';
@@ -683,6 +793,17 @@ function addMessageToUI(msg, animate) {
   if (!animate) div.style.animation = 'none';
 
   let html = '';
+  if (msg.fileName) {
+    const isPdf = /\.pdf$/i.test(msg.fileName);
+    html += `
+      <div class="file-bubble">
+        <div class="file-ico">${isPdf ? 'PDF' : 'FILE'}</div>
+        <div class="file-meta">
+          <div class="file-name">${escapeHtml(msg.fileName)}</div>
+          <div class="file-status"><span class="sent-check">✓</span><span class="send-label">Sent</span></div>
+        </div>
+      </div>`;
+  }
   if (msg.imageUrl) {
     html += '<img src="' + msg.imageUrl + '" alt="image" loading="lazy">';
   }
@@ -698,6 +819,12 @@ function addMessageToUI(msg, animate) {
 
   div.innerHTML = html;
   messagesEl.appendChild(div);
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
 }
 
 function formatTime(date) {
@@ -717,6 +844,47 @@ function scrollToBottom() {
   requestAnimationFrame(() => {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
+}
+
+// ====================== FILE SENDING UI ======================
+function showFileSendingBubble(fileName) {
+  removeFileSendingBubble();
+  const div = document.createElement('div');
+  div.className = 'message user file-sending';
+  div.id = 'fileSendingBubble';
+  div.innerHTML = `
+    <div class="file-bubble">
+      <div class="file-ico">PDF</div>
+      <div class="file-meta">
+        <div class="file-name">${fileName}</div>
+        <div class="file-status">
+          <span class="sending-dots"><i></i><i></i><i></i></span>
+          <span class="send-label">Sending...</span>
+        </div>
+      </div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollToBottom();
+}
+
+function removeFileSendingBubble() {
+  const old = document.getElementById('fileSendingBubble');
+  if (old) old.remove();
+}
+
+function showFileSentPopup(fileName) {
+  const old = document.querySelector('.file-sent-popup');
+  if (old) old.remove();
+  const isPdf = /\.pdf$/i.test(fileName || '');
+  const pop = document.createElement('div');
+  pop.className = 'file-sent-popup';
+  pop.innerHTML = '<span class="pop-check">✓</span> ' + (isPdf ? 'PDF Sent' : 'File Sent');
+  document.body.appendChild(pop);
+  requestAnimationFrame(() => pop.classList.add('show'));
+  setTimeout(() => {
+    pop.classList.remove('show');
+    setTimeout(() => pop.remove(), 400);
+  }, 2200);
 }
 
 // ====================== DELETE ======================
@@ -904,6 +1072,8 @@ function toggleEditProfile() {
 function handleLogout() {
   if (!confirm('Are you sure you want to logout?')) return;
 
+  disablePresence();
+
   localStorage.removeItem('chat_user_name');
   localStorage.removeItem('chat_quotex_uid');
   localStorage.removeItem('chat_user_id');
@@ -949,6 +1119,7 @@ async function init() {
         handleLanguagePersistence();
         loadMessages();
         loadProfile();
+        enablePresence();
         return;
       }
     } catch (e) {
@@ -961,6 +1132,7 @@ async function init() {
   if (localStorage.getItem('chat_logged_in') === 'true') {
     await setupUser();
     loadProfile();
+    enablePresence();
   } else {
     loginOverlay.classList.add('active');
   }
@@ -970,7 +1142,8 @@ async function init() {
 function updateSendButton() {
   const hasText = textInput.value.trim().length > 0;
   const hasImage = selectedImageFile !== null;
-  sendBtn.disabled = !(hasText || hasImage);
+  const hasFile = selectedFile !== null;
+  sendBtn.disabled = !(hasText || hasImage || hasFile);
 }
 
 textInput.addEventListener('input', () => {
@@ -997,36 +1170,55 @@ fileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (!file.type.startsWith('image/')) {
-    alert('Only image files are allowed');
+  if (file.size > 50 * 1024 * 1024) {
+    alert('File must be less than 50MB');
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image must be less than 5MB');
-    return;
-  }
+  selectedFile = null;
+  selectedImageFile = null;
 
-  selectedImageFile = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    previewImg.src = e.target.result;
+  if (file.type.startsWith('image/')) {
+    selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      previewName.textContent = file.name;
+      previewImg.style.display = 'block';
+      imagePreview.classList.add('active');
+      updateSendButton();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    selectedFile = file;
+    previewImg.style.display = 'none';
     previewName.textContent = file.name;
     imagePreview.classList.add('active');
     updateSendButton();
-  };
-  reader.readAsDataURL(file);
+  }
   fileInput.value = '';
 });
 
-function removeSelectedImage() {
-  selectedImageFile = null;
+function removeSelectedFile() {
+  selectedFile = null;
+  previewImg.style.display = 'block';
   imagePreview.classList.remove('active');
   previewImg.src = '';
   updateSendButton();
 }
 
-removeImg.addEventListener('click', removeSelectedImage);
+function removeSelectedImage() {
+  selectedImageFile = null;
+  imagePreview.classList.remove('active');
+  previewImg.src = '';
+  previewImg.style.display = 'block';
+  updateSendButton();
+}
+
+removeImg.addEventListener('click', () => {
+  removeSelectedFile();
+  removeSelectedImage();
+});
 
 profileBtn.addEventListener('click', () => switchTab('profile'));
 menuBtn.addEventListener('click', toggleMenu);
@@ -1052,5 +1244,14 @@ function showToast(msg) {
 init();
 
 window.addEventListener('beforeunload', () => {
+  disablePresence();
   if (unsubMessages) unsubMessages();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && userId) {
+    db.collection('chatUsers').doc(userId).update({ online: false }).catch(function() {});
+  } else if (!document.hidden && userId) {
+    setOnlineStatus(true);
+  }
 });

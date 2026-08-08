@@ -907,6 +907,129 @@
       from { opacity: 0; transform: translateX(-50%) translateY(10px); }
     }
 
+    /* File bubble (PDF send) */
+    .file-bubble {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 160px;
+    }
+
+    .file-ico {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #FF3B30, #FF6B4A);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(255, 59, 48, 0.35);
+    }
+
+    .file-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ios-text);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--ios-subtext);
+    }
+
+    .sent-check {
+      color: var(--ios-blue);
+      font-weight: 700;
+    }
+
+    .file-sending {
+      opacity: 0.75;
+    }
+
+    .sending-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .sending-dots i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ios-blue);
+      animation: fileDot 1s infinite ease-in-out;
+    }
+
+    .sending-dots i:nth-child(2) { animation-delay: 0.15s; }
+    .sending-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes fileDot {
+      0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-3px); }
+    }
+
+    /* File sent popup */
+    .file-sent-popup {
+      position: fixed;
+      bottom: 110px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(0, 0, 0, 0.82);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      z-index: 750;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .file-sent-popup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .pop-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #34C759;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
     /* Loading spinner */
     .loading-spinner {
       width: 24px;
@@ -1381,7 +1504,7 @@
           <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
         </svg>
       </button>
-      <input type="file" id="fileInput" accept="image/*" style="display:none">
+      <input type="file" id="fileInput" accept="*/*" style="display:none">
       <textarea class="text-input" id="textInput" placeholder="Type a message..." rows="1"></textarea>
       <button class="send-btn" id="sendBtn" disabled>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

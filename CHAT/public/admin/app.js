@@ -29,6 +29,8 @@ let unsubMsgs = null;
 let editingMessageId = null;
 let unreadUsers = new Set();
 let lastSeenMessages = {};
+let knownOnline = {};
+let selfSentFlags = {};
 
 async function uploadImageToTelegram(file) {
   const formData = new FormData();
@@ -321,19 +323,33 @@ function subscribeUsers() {
     .orderBy('lastActive', 'desc')
     .onSnapshot((snapshot) => {
       snapshot.docChanges().forEach(function(change) {
+        var data = change.doc.data();
+        var uid = change.doc.id;
+        var assignedId = data.assignedId;
+        var displayName = data.userName || data.name || ('User #' + (assignedId || '?'));
+        var isOnline = data.online === true;
+        var wasOnline = knownOnline[uid] === true;
+
+        if ((change.type === 'modified' || change.type === 'added') && knownOnline[uid] !== undefined && isOnline !== wasOnline) {
+          showToast((isOnline ? '\uD83D\uDFE2 ' : '\u26AA ') + displayName + ' is ' + (isOnline ? 'online' : 'offline'));
+        }
+        knownOnline[uid] = isOnline;
+
         if (change.type === 'modified') {
-          var data = change.doc.data();
-          var uid = change.doc.id;
           var prevMsg = lastSeenMessages[uid] || '';
           var currMsg = data.lastMessage || '';
           if (currMsg !== prevMsg && uid !== selectedUserId) {
-            unreadUsers.add(uid);
+            var selfSend = selfSentFlags[uid] !== undefined && (Date.now() - selfSentFlags[uid]) < 4000;
+            if (!selfSend) {
+              unreadUsers.add(uid);
+              showChatNotification(uid, displayName, currMsg, assignedId, data);
+            }
           }
           lastSeenMessages[uid] = currMsg;
         }
         if (change.type === 'added') {
-          var data = change.doc.data();
-          lastSeenMessages[change.doc.id] = data.lastMessage || '';
+          var data2 = change.doc.data();
+          lastSeenMessages[change.doc.id] = data2.lastMessage || '';
           if (change.doc.id !== selectedUserId) {
             unreadUsers.add(change.doc.id);
           }
@@ -345,6 +361,7 @@ function subscribeUsers() {
       });
       renderUserList(searchInput.value);
       if (selectedUserId) updateBlockBtn(selectedUserId);
+      refreshChatStatusBar(selectedUserId);
       if (currentTab === 'pageStats') refreshStats();
     }, (err) => {
       console.error('Users error:', err);
@@ -397,6 +414,7 @@ function renderUserList(filter = '') {
       </div>
       <div class="user-info">
         <div class="user-name">${u.assignedId || '?'}. ${displayName}</div>
+        <div class="user-preview">${u.typing ? '<span class="user-typing">typing…</span>' : (isOnline ? 'Online' : (u.lastActive && u.lastActive.toDate ? 'Offline · last seen ' + formatTimeAgo(u.lastActive.toDate()) : 'Offline'))}</div>
       </div>
     `;
 
@@ -474,6 +492,7 @@ async function selectUser(userId) {
   renderUserList(searchInput.value);
 
   subscribeMessages(userId);
+  refreshChatStatusBar(userId);
   adminTextInput.focus();
 }
 
@@ -486,6 +505,29 @@ function updateBlockBtn(userId) {
     blockBtn.textContent = 'Block';
     blockBtn.classList.add('danger');
   }
+}
+
+function refreshChatStatusBar(userId) {
+  const bar = document.getElementById('chatStatusBar');
+  if (!bar) return;
+  if (!userId) {
+    bar.style.display = 'none';
+    return;
+  }
+  const user = users.find(u => u.id === userId);
+  if (!user) return;
+  const isOnline = user.online === true;
+  const isTyping = user.typing === true;
+
+  bar.style.display = 'flex';
+  const dot = document.getElementById('csbDot');
+  dot.className = 'csb-dot' + (isOnline ? ' online' : '');
+  document.getElementById('csbStatus').textContent = isOnline
+    ? 'Online'
+    : (user.lastActive && user.lastActive.toDate ? 'Last seen ' + formatTimeAgo(user.lastActive.toDate()) : 'Offline');
+
+  const typingEl = document.getElementById('csbTyping');
+  typingEl.style.display = isTyping ? 'flex' : 'none';
 }
 
 // ====================== SUBSCRIBE MESSAGES ======================
@@ -546,6 +588,10 @@ function addMessageToUI(msg, animate) {
 
   const ts = msg.timestamp && msg.timestamp.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now';
   var inner = '';
+  if (msg.fileName) {
+    const isPdf = /\.pdf$/i.test(msg.fileName);
+    inner += '<div class="file-bubble"><div class="file-ico">' + (isPdf ? 'PDF' : 'FILE') + '</div><div class="file-meta"><div class="file-name">' + escapeHtml(msg.fileName) + '</div><div class="file-status"><span class="sent-check">✓</span><span class="send-label">File Sent</span></div></div></div>';
+  }
   if (msg.imageUrl) inner += '<img src="' + msg.imageUrl + '" alt="Image" onclick="window.open(this.src)" loading="lazy">';
   if (msg.text) inner += msg.text;
   inner += '<span class="time">' + ts + '</span>';
@@ -559,6 +605,13 @@ function addMessageToUI(msg, animate) {
   copyAct.className = 'copy-act'; copyAct.textContent = 'Copy';
   copyAct.onclick = function(e) { e.stopPropagation(); copyMsg(msg.text || ''); };
   actDiv.appendChild(copyAct);
+
+  if (msg.fileUrl) {
+    var openAct = document.createElement('button');
+    openAct.className = 'copy-act'; openAct.textContent = 'Open';
+    openAct.onclick = function(e) { e.stopPropagation(); window.open(msg.fileUrl); };
+    actDiv.appendChild(openAct);
+  }
 
   var delAct = document.createElement('button');
   delAct.className = 'del-act'; delAct.textContent = 'Delete';
@@ -593,6 +646,10 @@ function updateMessageInUI(existing, msg) {
 
   const ts = msg.timestamp && msg.timestamp.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now';
   var ic = '';
+  if (msg.fileName) {
+    const isPdf = /\.pdf$/i.test(msg.fileName);
+    ic += '<div class="file-bubble"><div class="file-ico">' + (isPdf ? 'PDF' : 'FILE') + '</div><div class="file-meta"><div class="file-name">' + escapeHtml(msg.fileName) + '</div><div class="file-status"><span class="sent-check">✓</span><span class="send-label">File Sent</span></div></div></div>';
+  }
   if (msg.imageUrl) ic += '<img src="' + msg.imageUrl + '" alt="Image" onclick="window.open(this.src)" loading="lazy">';
   if (msg.text) ic += msg.text;
   ic += '<span class="time">' + ts + '</span>';
@@ -607,6 +664,13 @@ function updateMessageInUI(existing, msg) {
   cp.className = 'copy-act'; cp.textContent = 'Copy';
   cp.onclick = function(e) { e.stopPropagation(); copyMsg(msg.text || ''); };
   newAct.appendChild(cp);
+
+  if (msg.fileUrl) {
+    var op = document.createElement('button');
+    op.className = 'copy-act'; op.textContent = 'Open';
+    op.onclick = function(e) { e.stopPropagation(); window.open(msg.fileUrl); };
+    newAct.appendChild(op);
+  }
 
   var dl = document.createElement('button');
   dl.className = 'del-act'; dl.textContent = 'Delete';
@@ -635,6 +699,12 @@ function formatTime(date) {
   } catch {
     return '';
   }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
 }
 
 function scrollChatToBottom() {
@@ -724,6 +794,8 @@ async function adminSendMessage() {
 
   try {
     await fdb.collection('chatMessages').doc(selectedUserId).collection('messages').add(msgData);
+
+    selfSentFlags[selectedUserId] = Date.now();
 
     await fdb.collection('chatUsers').doc(selectedUserId).update({
       lastMessage: text || '[Image]',
@@ -881,6 +953,7 @@ backBtn.addEventListener('click', () => {
   adminTextInput.value = '';
   adminSendBtn.disabled = true;
   autoResizeTextarea();
+  refreshChatStatusBar(null);
   if (unsubMsgs) unsubMsgs();
   renderUserList(searchInput.value);
 });
@@ -901,6 +974,65 @@ function showToast(msg) {
     t.classList.add('toast-out');
     setTimeout(function() { t.remove(); }, 250);
   }, 2500);
+}
+
+// ====================== CHAT NOTIFICATIONS ======================
+const notifStackEl = document.getElementById('notifStack');
+
+function showChatNotification(uid, displayName, lastMsg, assignedId, userData) {
+  if (!notifStackEl) return;
+  const notif = document.createElement('div');
+  notif.className = 'notif-card';
+  notif.dataset.uid = uid;
+
+  var preview = (lastMsg || '').slice(0, 60) || 'New message';
+  preview = escapeHtml(preview);
+
+  var isImg = /(Image|\[Image\])/i.test(lastMsg || '');
+
+  var emo = getUE(assignedId || 1);
+  var logo = '';
+  if (userData && userData.logo) {
+    logo = '<span class="notif-avatar" style="background-image:url(\'' + userData.logo + '\')"></span>';
+  } else {
+    logo = '<span class="notif-avatar">' + emo + '</span>';
+  }
+
+  var typeIcon = isImg ? '🖼' : '📩';
+  if (/\.pdf$/i.test(lastMsg)) typeIcon = '📄';
+
+  notif.innerHTML =
+    '<button class="notif-close">×</button>' +
+    '<div class="notif-avatar-wrap">' + logo + '</div>' +
+    '<div class="notif-body">' +
+      '<div class="notif-title">' + typeIcon + ' ' + emo + ' User ' + (assignedId || '?') + ' (' + escapeHtml(displayName.slice(0, 22)) + ')</div>' +
+      '<div class="notif-msg">' + preview + '</div>' +
+    '</div>';
+
+  notif.querySelector('.notif-close').addEventListener('click', function(e) {
+    e.stopPropagation();
+    notif.classList.remove('show');
+    setTimeout(function() { notif.remove(); }, 300);
+  });
+
+  notif.addEventListener('click', function() {
+    selectUser(uid);
+    notif.remove();
+  });
+
+  notifStackEl.appendChild(notif);
+  requestAnimationFrame(function() { notif.classList.add('show'); });
+
+  setTimeout(function() {
+    if (notif.parentNode) {
+      notif.classList.remove('show');
+      setTimeout(function() { notif.remove(); }, 300);
+    }
+  }, 5000);
+
+  while (notifStackEl.children.length > 3) {
+    notifStackEl.firstChild.remove();
+  }
 }
 
 // ====================== INIT ======================
