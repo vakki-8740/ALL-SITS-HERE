@@ -534,7 +534,6 @@ body {
 .action-card:nth-child(2) .action-img-wrap { animation-delay: 0.7s; }
 .action-card:nth-child(3) .action-img-wrap { animation-delay: 1.4s; }
 .action-card:nth-child(4) .action-img-wrap { animation-delay: 2.1s; }
-
 @media (max-width: 480px) {
   .ios-card {
     margin: 10px;
@@ -1011,3 +1010,4 @@ body {
   padding: 6px;
   animation: splashLogoAnim 1.2s ease forwards;
 }
+

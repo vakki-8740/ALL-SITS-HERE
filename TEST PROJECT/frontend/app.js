@@ -1,4 +1,5 @@
-const API = 'http://localhost:3000/api';
+const BACKEND_URL = 'https://test-project-qhbf.onrender.com';
+const API = BACKEND_URL + '/api';
 let token = localStorage.getItem('token');
 let currentUser = null;
 let selectedUserId = null;
@@ -87,12 +88,21 @@ function parseToken(token) {
 }
 
 function connectSocket() {
-  socket = io('http://localhost:3000');
-  socket.emit('login', token);
+  socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+
+  socket.on('connect', () => {
+    socket.emit('login', token);
+  });
 
   socket.on('private-message', (msg) => {
-    if (selectedUserId && (msg.sender_id === selectedUserId || msg.receiver_id === selectedUserId)) {
+    const isForCurrentChat = selectedUserId && (msg.sender_id === selectedUserId || msg.receiver_id === selectedUserId);
+    const isForMe = msg.receiver_id === currentUser.id;
+    if (isForCurrentChat) {
       appendMessage(msg);
+    }
+    if (isForMe && !isForCurrentChat) {
+      const senderEl = document.querySelector(`.user-item[data-user-id="${msg.sender_id}"]`);
+      if (senderEl) senderEl.style.fontWeight = 'bold';
     }
   });
 

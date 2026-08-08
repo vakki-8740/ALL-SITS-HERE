@@ -74,6 +74,7 @@ const textInput = document.getElementById('textInput');
 const sendBtn = document.getElementById('sendBtn');
 const attachBtn = document.getElementById('attachBtn');
 const fileInput = document.getElementById('fileInput');
+const docInput = document.getElementById('docInput');
 const imagePreview = document.getElementById('imagePreview');
 const previewImg = document.getElementById('previewImg');
 const previewName = document.getElementById('previewName');
@@ -1165,6 +1166,10 @@ textInput.addEventListener('keydown', (e) => {
 
 sendBtn.addEventListener('click', sendMessage);
 attachBtn.addEventListener('click', () => fileInput.click());
+document.getElementById('fileBtn').addEventListener('click', () => {
+  selectedFile = null;
+  docInput.click();
+});
 
 fileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -1190,13 +1195,33 @@ fileInput.addEventListener('change', (e) => {
     };
     reader.readAsDataURL(file);
   } else {
+    alert('Please use the file button for non-image files');
+  }
+  fileInput.value = '';
+});
+
+docInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 50 * 1024 * 1024) {
+    alert('File must be less than 50MB');
+    return;
+  }
+
+  selectedFile = null;
+  selectedImageFile = null;
+
+  if (file.type.startsWith('image/')) {
+    alert('Please use the image button for images');
+  } else {
     selectedFile = file;
     previewImg.style.display = 'none';
     previewName.textContent = file.name;
     imagePreview.classList.add('active');
     updateSendButton();
   }
-  fileInput.value = '';
+  docInput.value = '';
 });
 
 function removeSelectedFile() {
