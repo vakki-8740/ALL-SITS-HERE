@@ -421,7 +421,7 @@ function submitUnblockRequest() {
     showUnlockToast('Submission failed - try again', 'error');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Verify';
+      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify Account';
     }
   });
 }
