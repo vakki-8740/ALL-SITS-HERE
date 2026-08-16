@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>File a Complaint - Parimatch Support</title>
+  <title>Withdrawal Problem - Parimatch Support</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/jpeg" href="LOGO/FASICON.jpg" />
 </head>
@@ -32,16 +32,16 @@
     <p class="tagline">Fast • Secure • Trusted Help</p>
   </header>
 
-  <!-- Complaint Form -->
+  <!-- Withdrawal Form -->
   <section id="supportForm" class="form-section ios-card" style="margin-top:20px;">
     <h3>
-      <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="var(--neon-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      File a Complaint
+      <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="var(--neon-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px;"><rect x="1" y="3" width="22" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M1 8h22"/></svg>
+      Withdrawal Problem
     </h3>
     <p class="form-subtitle">Fill details below for faster resolution</p>
 
     <div class="form-tabs">
-      <button class="tab-btn active" data-tab="deposit">Deposit Issue</button>
+      <button class="tab-btn active" data-tab="withdrawal">Withdrawal Issue</button>
     </div>
 
     <form id="problemForm" class="ios-form">
@@ -62,14 +62,19 @@
         </small>
       </div>
 
-      <div id="depositFields" class="form-fields active">
+      <div id="withdrawalFields" class="form-fields active">
         <div class="form-group">
-          <label>Deposit Amount (₹) *</label>
-          <input type="number" id="depositAmount" placeholder="e.g., 500" min="1" required />
+          <label>Withdrawal Amount (₹) *</label>
+          <input type="number" id="withdrawAmount" placeholder="e.g., 1000" min="1" required />
         </div>
         <div class="form-group">
-          <label>UTR / Transaction ID *</label>
-          <input type="text" id="utr" placeholder="e.g., UTR123456789" required />
+          <label>Withdrawal Method</label>
+          <select id="withdrawMethod">
+            <option value="">Select method</option>
+            <option value="upi">UPI</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="wallet">E-Wallet</option>
+          </select>
         </div>
       </div>
 
@@ -80,7 +85,7 @@
 
       <button type="submit" class="btn-primary btn-submit">
         <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Complain Now
+        Submit Request
       </button>
       <p class="form-note">
         <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -91,12 +96,8 @@
 
   <!-- Footer -->
   <footer class="ios-footer">
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="footer-badge" style="margin-bottom:12px;">
-      <rect width="48" height="48" rx="12" fill="#1A1C20" stroke="#D8F529" stroke-width="2" opacity="0.8"/>
-      <path d="M24 12l-8 4v5c0 4 8 8 8 8s8-4 8-8v-5l-8-4z" stroke="#D8F529" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <polyline points="20,22 24,27 30,19" stroke="#D8F529" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    <p>© 2026 Parimatch Official Support. All rights reserved.</p>
+    <img src="LOGO/FASICON.jpg" alt="Parimatch" class="footer-badge" style="width:48px; height:48px; margin-bottom:12px; border-radius:12px; object-fit:cover;" />
+    <p>© 2020 Parimatch Official Support. All rights reserved.</p>
     <p class="disclaimer">This is a support portal only. Not for betting/gambling.</p>
     <div class="footer-links">
       <a href="index.html">Home</a>

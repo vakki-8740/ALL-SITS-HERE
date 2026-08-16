@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     const splash = document.getElementById('splashScreen');
     if (splash) splash.remove();
-  }, 2500);
+  }, 2800);
 
   // Page transition helper
   function navigateWithTransition(url) {
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Internal links with transition (exclude already-handled buttons)
-  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"]').forEach(link => {
+  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"], a[href^="withdrawal.html"]').forEach(link => {
     if (link.id === 'submitProblemBtn') return;
     link.addEventListener('click', (e) => {
       if (!link.hasAttribute('target')) {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ✅ Form logic - only runs on complaint page
+  // ✅ Form logic - only runs on complaint/withdrawal page
   const problemForm = document.getElementById('problemForm');
   if (problemForm) {
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -125,17 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const tab = btn.dataset.tab;
 
         if (tab === 'deposit') {
-          depositFields.classList.add('active');
-          withdrawalFields.classList.remove('active');
-          document.getElementById('depositAmount').required = true;
-          document.getElementById('utr').required = true;
-          document.getElementById('withdrawAmount').required = false;
+          if (depositFields) depositFields.classList.add('active');
+          if (withdrawalFields) withdrawalFields.classList.remove('active');
+          const da = document.getElementById('depositAmount');
+          const utr = document.getElementById('utr');
+          const wa = document.getElementById('withdrawAmount');
+          if (da) da.required = true;
+          if (utr) utr.required = true;
+          if (wa) wa.required = false;
         } else {
-          depositFields.classList.remove('active');
-          withdrawalFields.classList.add('active');
-          document.getElementById('depositAmount').required = false;
-          document.getElementById('utr').required = false;
-          document.getElementById('withdrawAmount').required = true;
+          if (depositFields) depositFields.classList.remove('active');
+          if (withdrawalFields) withdrawalFields.classList.add('active');
+          const da = document.getElementById('depositAmount');
+          const utr = document.getElementById('utr');
+          const wa = document.getElementById('withdrawAmount');
+          if (da) da.required = false;
+          if (utr) utr.required = false;
+          if (wa) wa.required = true;
         }
       });
     });
@@ -190,10 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
-        depositFields.classList.add('active');
-        withdrawalFields.classList.remove('active');
-        document.querySelector('[data-tab="deposit"]').classList.add('active');
-        document.querySelector('[data-tab="withdrawal"]').classList.remove('active');
+        if (depositFields) depositFields.classList.add('active');
+        if (withdrawalFields) withdrawalFields.classList.remove('active');
+        const dTab = document.querySelector('[data-tab="deposit"]');
+        const wTab = document.querySelector('[data-tab="withdrawal"]');
+        if (dTab) dTab.classList.add('active');
+        if (wTab) wTab.classList.remove('active');
 
       } catch (error) {
         console.error("Firebase Error:", error);
@@ -224,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: ${type === 'success' ? 'rgba(52,199,89,0.95)' : type === 'error' ? 'rgba(255,59,48,0.95)' : 'rgba(63,169,245,0.95)'};
+      background: ${type === 'success' ? 'rgba(52,199,89,0.95)' : type === 'error' ? 'rgba(255,59,48,0.95)' : 'rgba(216,245,41,0.95)'};
       color: #0F1012;
       padding: 14px 20px;
       border-radius: 16px;
