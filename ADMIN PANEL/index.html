@@ -8,7 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Admin Panel</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23007AFF'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>A</text></svg>" />
+  <link rel="icon" type="image/jpeg" href="LOGO/FASICON.jpg" />
+  <link rel="apple-touch-icon" href="LOGO/FASICON.jpg" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -107,6 +108,15 @@
           <button class="pill" data-type="bonus"><i class="fa-solid fa-gift"></i> Bonus Problem</button>
         </div>
 
+        <div class="pills-scroll" id="statusPills">
+          <button class="pill active" data-status="all">All</button>
+          <button class="pill" data-status="Pending">Pending</button>
+          <button class="pill" data-status="Processing">Processing</button>
+          <button class="pill" data-status="Rejected">Rejected</button>
+          <button class="pill" data-status="Failed">Failed</button>
+          <button class="pill" data-status="Success but not received">Success not received</button>
+        </div>
+
         <div class="pills-scroll" id="sitePills"></div>
 
         <div class="list-info">
@@ -142,7 +152,7 @@
           <div class="ios-group-title">Preferences</div>
           <div class="ios-row">
             <div class="ios-row-left">
-              <div class="ios-row-icon" style="background:rgba(0,122,255,0.1);color:#007AFF"><i class="fa-solid fa-bell"></i></div>
+              <div class="ios-row-icon" style="background:rgba(216,245,41,0.25);color:#1A1C20"><i class="fa-solid fa-bell"></i></div>
               <div><div class="ios-row-title">Sound Alerts</div><div class="ios-row-sub">New submission sound</div></div>
             </div>
             <label class="toggle"><input type="checkbox" id="soundToggle" /><span class="toggle-slider"></span></label>

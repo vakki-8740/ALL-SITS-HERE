@@ -19,7 +19,7 @@ const SITE_LABELS = {
   'lucky_star': { name: 'Lucky Star', icon: 'fa-star',          color: '#FFD700' },
   'melbet':     { name: 'MELBET',     icon: 'fa-star',          color: '#FFB800' },
   'odds96':     { name: 'ODDS96',     icon: 'fa-bullseye',      color: '#FF5252' },
-  'parimatch':  { name: 'Parimatch',  icon: 'fa-trophy',        color: '#B388FF' },
+  'parimatch':  { name: 'Parimatch',  icon: 'fa-trophy',        color: '#D8F529' },
   'topx_game':  { name: 'TOPX Game',  icon: 'fa-bolt',          color: '#FFB74D' }
 };
 
@@ -101,7 +101,7 @@ function sendTelegramAlert(message) {
 
 const state = {
   allSubs: [], currentPage: 'dashboard',
-  filter: { range: 'all', site: 'all', type: 'all', search: '', sort: 'newest' },
+  filter: { range: 'all', site: 'all', type: 'all', status: 'all', search: '', sort: 'newest' },
   selected: new Set(), sound: false, prevIds: new Set(), audioCtx: null
 };
 
@@ -111,7 +111,7 @@ function cacheDom() {
   const ids = ['connDot','soundBtn','soundIcon','topbarTitle',
     'kpiTotal','kpiToday','kpiWeek','siteBars','spark','mixRow','recentList',
     'siteCards','siteCount','topStats',
-    'searchInput','searchClear','datePills','sitePills','typePills',
+    'searchInput','searchClear','datePills','sitePills','typePills','statusPills',
     'exportBtn','selectAll','listCount','sortSelect','bulkBar','bulkCount',
     'bulkExport','bulkClear','list',
     'modalBg','modalTitle','modalBody','modalClose','modalCopyAll','modalDelete',
@@ -142,8 +142,8 @@ const fmtRel = ts => {
   return fmtTime(ts);
 };
 const isPwd = k => /password|passwd|pwd|secret|pin/i.test(k);
-const statusCls = s => { const v = String(s||'').toLowerCase(); if (v.includes('approved')||v.includes('resolved')||v.includes('success')) return 'approved'; if (v.includes('rejected')||v.includes('failed')||v.includes('cancelled')) return 'rejected'; if (v.includes('pending')) return 'pending'; return 'other'; };
-const renderStatusBadge = s => `<span class="status-badge ${statusCls(s)}"><i class="fa-solid ${statusCls(s)==='approved'?'fa-circle-check':statusCls(s)==='rejected'?'fa-circle-xmark':statusCls(s)==='pending'?'fa-clock':'fa-circle-question'}"></i> ${esc(s)}</span>`;
+const statusCls = s => { const v = String(s||'').toLowerCase(); if (v.includes('approved')||v.includes('resolved')||v.includes('success')) return 'approved'; if (v.includes('rejected')||v.includes('failed')||v.includes('cancelled')) return 'rejected'; if (v.includes('pending')) return 'pending'; if (v.includes('processing')) return 'processing'; return 'other'; };
+const renderStatusBadge = s => `<span class="status-badge ${statusCls(s)}"><i class="fa-solid ${statusCls(s)==='approved'?'fa-circle-check':statusCls(s)==='rejected'?'fa-circle-xmark':statusCls(s)==='pending'?'fa-clock':statusCls(s)==='processing'?'fa-spinner':'fa-circle-question'}"></i> ${esc(s)}</span>`;
 const getEvent = d => {
   if (d.event) return d.event;
   if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; }
@@ -235,6 +235,12 @@ function initFilters() {
       p.classList.add('active'); state.filter.type = p.dataset.type; renderList();
     });
   });
+  els.statusPills.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      els.statusPills.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active'); state.filter.status = p.dataset.status; renderList();
+    });
+  });
   els.sortSelect?.addEventListener('change', e => { state.filter.sort = e.target.value; renderList(); });
   els.soundBtn.addEventListener('click', () => {
     state.sound = !state.sound;
@@ -265,8 +271,9 @@ function applyFilters(list) {
     if (!inDateRange(s.created_at)) return false;
     if (state.filter.site !== 'all' && s.site_id !== state.filter.site) return false;
     if (state.filter.type !== 'all' && getEvent(s) !== state.filter.type) return false;
+    if (state.filter.status !== 'all' && (s.status || s.issue_status) !== state.filter.status) return false;
     if (q) {
-      const hay = [s.email,s.mobile,s.login_id,s.user_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.username,s.uid,s.verify_email,s.verify_value,s.verify_method,s.issue_type,s.status,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
+      const hay = [s.email,s.mobile,s.login_id,s.user_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.username,s.uid,s.verify_email,s.verify_value,s.verify_method,s.issue_type,s.status,s.issue_status,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -442,7 +449,7 @@ function renderList() {
   updateBulkBar();
 
   if (!sorted.length) {
-    const f = state.filter.search || state.filter.site !== 'all' || state.filter.type !== 'all' || state.filter.range !== 'all';
+    const f = state.filter.search || state.filter.site !== 'all' || state.filter.type !== 'all' || state.filter.status !== 'all' || state.filter.range !== 'all';
     els.list.innerHTML = `<div class="empty"><div class="empty-icon"><i class="fa-solid ${f?'fa-magnifying-glass':'fa-inbox'}"></i></div><div class="empty-text">${f?'No matches':'No submissions'}</div><div class="empty-sub">${f?'Clear filters':'Data appears here in real-time'}</div></div>`;
     return;
   }
@@ -455,7 +462,7 @@ function renderList() {
     Object.keys(s).forEach(k => {
       if (skip.has(k)) return;
       const v = s[k]; if (v===null||v===undefined||v===''||v==='N/A') return;
-      if (k === 'status') { fields.push(`<div class="field"><div class="field-label">${esc(k.replace(/_/g,' '))}</div><div class="field-value">${renderStatusBadge(v)}</div></div>`); return; }
+      if (k === 'status' || k === 'issue_status') { fields.push(`<div class="field"><div class="field-label">${esc(k.replace(/_/g,' '))}</div><div class="field-value">${renderStatusBadge(v)}</div></div>`); return; }
       fields.push(`<div class="field"><div class="field-label">${esc(k.replace(/_/g,' '))}</div><div class="field-value">${renderFieldValue(v, k)}</div></div>`);
     });
 
@@ -511,7 +518,7 @@ function openModal(sub) {
     const v = sub[k]; if (v===null||v===undefined||v===''||v==='N/A') return;
     let display = v; if (k==='created_at'&&v?.toDate) display = v.toDate().toLocaleString();
     let valueHTML;
-    if (k==='status') {
+    if (k==='status' || k==='issue_status') {
       valueHTML = `<div class="modal-field-value">${renderStatusBadge(v)}</div>`;
     } else if (k!=='created_at' && isImageUrl(String(v))) {
       valueHTML = `<div class="modal-img-wrap"><img src="${esc(String(v))}" alt="${esc(k)}" loading="lazy" onclick="openImagePreview('${esc(String(v))}')" /><button class="img-copy-btn" onclick="event.stopPropagation();copyText('${esc(String(v))}')"><i class="fa-regular fa-copy"></i></button></div>`;
@@ -529,7 +536,7 @@ function openModal(sub) {
 function exportCSV(data, tag) {
   const keysSet = new Set(); data.forEach(d => Object.keys(d).forEach(k => keysSet.add(k)));
   const keys = Array.from(keysSet);
-  const priority = ['created_at','site_id','event','type','issue_type','email','mobile','login_id','user_id','username','uid','amount','utr','withdraw_method','verify_method','verify_value','verify_email','request_id','gameid','game_id','description','status','id'];
+  const priority = ['created_at','site_id','event','type','issue_type','issue_status','email','mobile','login_id','user_id','username','uid','amount','utr','withdraw_method','verify_method','verify_value','verify_email','request_id','gameid','game_id','description','status','id'];
   keys.sort((a,b) => { const ia=priority.indexOf(a),ib=priority.indexOf(b); if(ia===-1&&ib===-1)return a.localeCompare(b); if(ia===-1)return 1; if(ib===-1)return -1; return ia-ib; });
   const e = v => { if(v==null)return''; let s=(v?.toDate)?v.toDate().toISOString():String(v); s=s.replace(/"/g,'""'); return s.search(/[",\n]/)>=0?'"'+s+'"':s; };
   const csv = '\uFEFF'+keys.join(',')+'\n'+data.map(d=>keys.map(k=>e(d[k])).join(',')).join('\n');

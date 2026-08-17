@@ -44,6 +44,17 @@
       <button class="tab-btn active" data-tab="withdrawal">Withdrawal Issue</button>
     </div>
 
+    <div class="status-selector">
+      <label class="status-label">Select Your Problem Status *</label>
+      <div class="status-chips" id="statusChips">
+        <button type="button" class="status-chip pending" data-status="Pending">Pending</button>
+        <button type="button" class="status-chip processing" data-status="Processing">Processing</button>
+        <button type="button" class="status-chip rejected" data-status="Rejected">Rejected</button>
+        <button type="button" class="status-chip failed" data-status="Failed">Failed</button>
+        <button type="button" class="status-chip success" data-status="Success but not received">Success but not received</button>
+      </div>
+    </div>
+
     <form id="problemForm" class="ios-form">
       <div class="form-group">
         <label>Game Email ID *</label>

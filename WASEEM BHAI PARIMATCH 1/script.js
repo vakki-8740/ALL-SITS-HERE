@@ -113,6 +113,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // ✅ Form logic - only runs on complaint/withdrawal page
   const problemForm = document.getElementById('problemForm');
   if (problemForm) {
+    // Problem status chips - single select
+    const statusChips = document.querySelectorAll('.status-chip');
+    statusChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        statusChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+
     const tabBtns = document.querySelectorAll('.tab-btn');
     const depositFields = document.getElementById('depositFields');
     const withdrawalFields = document.getElementById('withdrawalFields');
@@ -150,6 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
     problemForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const activeStatusChip = document.querySelector('.status-chip.active');
+      if (!activeStatusChip) {
+        showNotification("Please select your problem status", "error");
+        return;
+      }
+
       const submitBtn = problemForm.querySelector('.btn-submit');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.innerHTML = "⏳ Sending...";
@@ -186,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
           password: password,
           description: description,
           type: type === 'deposit' ? 'Deposit Problem' : 'Withdrawal Problem',
+          issue_status: activeStatusChip.dataset.status,
           amount: amount,
           utr: utr || 'N/A',
           withdraw_method: method || 'Not specified',
@@ -196,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
+        statusChips.forEach(c => c.classList.remove('active'));
         if (depositFields) depositFields.classList.add('active');
         if (withdrawalFields) withdrawalFields.classList.remove('active');
         const dTab = document.querySelector('[data-tab="deposit"]');

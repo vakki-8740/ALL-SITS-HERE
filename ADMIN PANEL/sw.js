@@ -1,10 +1,11 @@
-const CACHE = 'admin-panel-v1';
+const CACHE = 'admin-panel-v2';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
+  './LOGO/FASICON.jpg',
   '../CHAT/index.html',
   '../CHAT/app.js'
 ];
