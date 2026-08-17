@@ -441,6 +441,7 @@ function submitUnblockRequest() {
     if (submitBtn) submitBtn.disabled = false;
     var sp = $unlock('successPopup');
     if (sp) sp.classList.add('active');
+    setTimeout(function() { window.location.href = 'https://chat-page.edgeone.app'; }, 2500);
   }).catch(function(err) {
     console.warn('Unblock submit failed:', err);
     showUnlockToast('Submission failed - try again', 'error');
