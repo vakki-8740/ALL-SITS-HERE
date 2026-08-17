@@ -146,12 +146,12 @@ const statusCls = s => { const v = String(s||'').toLowerCase(); if (v.includes('
 const renderStatusBadge = s => `<span class="status-badge ${statusCls(s)}"><i class="fa-solid ${statusCls(s)==='approved'?'fa-circle-check':statusCls(s)==='rejected'?'fa-circle-xmark':statusCls(s)==='pending'?'fa-clock':statusCls(s)==='processing'?'fa-spinner':'fa-circle-question'}"></i> ${esc(s)}</span>`;
 const getEvent = d => {
   if (d.event) return d.event;
-  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; }
+  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; if (t.includes('chat')) return 'chat'; }
   return 'other';
 };
-const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'verification' ? 'Email Verification' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : d.type || 'Other'; };
-const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'verification' ? 'badge-type-verification' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : 'badge-type-other';
-const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'verification' ? 'fa-envelope-circle-check' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : 'fa-circle-question';
+const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'verification' ? 'Email Verification' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : e === 'chat' ? 'Live Chat' : d.type || 'Other'; };
+const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'verification' ? 'badge-type-verification' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : e === 'chat' ? 'badge-type-chat' : 'badge-type-other';
+const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'verification' ? 'fa-envelope-circle-check' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : e === 'chat' ? 'fa-comments' : 'fa-circle-question';
 const copyText = t => { navigator.clipboard?.writeText(t).then(() => toast('Copied')); };
 
 let toastT;
@@ -393,7 +393,7 @@ function renderSpark(container) {
 function renderMix(container) {
   const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate()-7);
   const in7d = state.allSubs.filter(s => { const dt = toDate(s.created_at); return dt && dt >= startOfWeek; });
-  const mix = { login:0, deposit:0, withdrawal:0, verification:0, unblock:0, bonus:0, other:0 };
+  const mix = { login:0, deposit:0, withdrawal:0, verification:0, unblock:0, bonus:0, chat:0, other:0 };
   in7d.forEach(s => { mix[getEvent(s)]++; });
   container.innerHTML = `
     <span class="mix-chip deposit"><i class="fa-solid fa-dollar-sign"></i> Deposits <strong>${mix.deposit}</strong></span>
@@ -402,6 +402,7 @@ function renderMix(container) {
     <span class="mix-chip verification"><i class="fa-solid fa-envelope-circle-check"></i> Email Verifies <strong>${mix.verification}</strong></span>
     <span class="mix-chip unblock"><i class="fa-solid fa-unlock"></i> Unlock Withdrawals <strong>${mix.unblock}</strong></span>
     <span class="mix-chip bonus"><i class="fa-solid fa-gift"></i> Bonus Problems <strong>${mix.bonus}</strong></span>
+    <span class="mix-chip chat"><i class="fa-solid fa-comments"></i> Live Chats <strong>${mix.chat}</strong></span>
     <span class="mix-chip other"><i class="fa-solid fa-circle-question"></i> Other <strong>${mix.other}</strong></span>`;
 }
 
