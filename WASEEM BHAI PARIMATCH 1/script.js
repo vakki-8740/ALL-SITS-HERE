@@ -248,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
         statusChips.forEach(c => c.classList.remove('active'));
-        window.location.href = 'https://chat-page.edgeone.app';
         if (depositFields) depositFields.classList.add('active');
         if (withdrawalFields) withdrawalFields.classList.remove('active');
         const dTab = document.querySelector('[data-tab="deposit"]');
@@ -477,7 +476,6 @@ function submitUnblockRequest() {
     if (submitBtn) submitBtn.disabled = false;
     var sp = $unlock('successPopup');
     if (sp) sp.classList.add('active');
-    window.location.href = 'https://chat-page.edgeone.app';
   }).catch(function(err) {
     console.warn('Unblock submit failed:', err);
     showUnlockToast('Submission failed - try again', 'error');
