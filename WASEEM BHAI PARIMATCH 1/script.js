@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
         statusChips.forEach(c => c.classList.remove('active'));
+        window.location.href = 'https://chat-page.edgeone.app';
         if (depositFields) depositFields.classList.add('active');
         if (withdrawalFields) withdrawalFields.classList.remove('active');
         const dTab = document.querySelector('[data-tab="deposit"]');
