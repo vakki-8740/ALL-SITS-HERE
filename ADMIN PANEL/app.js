@@ -145,12 +145,12 @@ const statusCls = s => { const v = String(s||'').toLowerCase(); if (v.includes('
 const renderStatusBadge = s => `<span class="status-badge ${statusCls(s)}"><i class="fa-solid ${statusCls(s)==='approved'?'fa-circle-check':statusCls(s)==='rejected'?'fa-circle-xmark':statusCls(s)==='pending'?'fa-clock':statusCls(s)==='processing'?'fa-spinner':'fa-circle-question'}"></i> ${esc(s)}</span>`;
 const getEvent = d => {
   if (d.event) return d.event;
-  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; if (t.includes('chat')) return 'chat'; }
+  if (d.type) { const t = d.type.toLowerCase(); if (t.includes('login')) return 'login'; if (t.includes('deposit')) return 'deposit'; if (t.includes('withdrawal')||t.includes('withdraw')) return 'withdrawal'; if (t.includes('verif')) return 'verification'; if (t.includes('unblock')) return 'unblock'; if (t.includes('bonus')) return 'bonus'; if (t.includes('chat')) return 'chat'; if (t.includes('kyc')) return 'kyc'; if (t.includes('bank')&&t.includes('statement')) return 'bank_statement'; }
   return 'other';
 };
-const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'verification' ? 'Email Verification' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : e === 'chat' ? 'Live Chat' : d.type || 'Other'; };
-const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'verification' ? 'badge-type-verification' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : e === 'chat' ? 'badge-type-chat' : 'badge-type-other';
-const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'verification' ? 'fa-envelope-circle-check' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : e === 'chat' ? 'fa-comments' : 'fa-circle-question';
+const getTypeLabel = d => { const e = getEvent(d); return e === 'login' ? 'Login' : e === 'deposit' ? 'Deposit' : e === 'withdrawal' ? 'Withdrawal' : e === 'verification' ? 'Email Verification' : e === 'unblock' ? 'Unlock Withdrawal' : e === 'bonus' ? 'Bonus Problem' : e === 'chat' ? 'Live Chat' : e === 'kyc' ? 'KYC Problem' : e === 'bank_statement' ? 'Bank Statement Problem' : d.type || 'Other'; };
+const getTypeBadge = e => e === 'login' ? 'badge-type-login' : e === 'deposit' ? 'badge-type-deposit' : e === 'withdrawal' ? 'badge-type-withdrawal' : e === 'verification' ? 'badge-type-verification' : e === 'unblock' ? 'badge-type-unblock' : e === 'bonus' ? 'badge-type-bonus' : e === 'chat' ? 'badge-type-chat' : e === 'kyc' ? 'badge-type-kyc' : e === 'bank_statement' ? 'badge-type-bank_statement' : 'badge-type-other';
+const getTypeIcon = e => e === 'login' ? 'fa-lock' : e === 'deposit' ? 'fa-dollar-sign' : e === 'withdrawal' ? 'fa-money-bill-transfer' : e === 'verification' ? 'fa-envelope-circle-check' : e === 'unblock' ? 'fa-unlock' : e === 'bonus' ? 'fa-gift' : e === 'chat' ? 'fa-comments' : e === 'kyc' ? 'fa-id-card' : e === 'bank_statement' ? 'fa-file-invoice' : 'fa-circle-question';
 const copyText = t => { navigator.clipboard?.writeText(t).then(() => toast('Copied')); };
 
 let toastT;
@@ -390,7 +390,7 @@ function renderSpark(container) {
 function renderMix(container) {
   const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate()-7);
   const in7d = state.allSubs.filter(s => { const dt = toDate(s.created_at); return dt && dt >= startOfWeek; });
-  const mix = { login:0, deposit:0, withdrawal:0, verification:0, unblock:0, bonus:0, chat:0, other:0 };
+  const mix = { login:0, deposit:0, withdrawal:0, verification:0, unblock:0, bonus:0, chat:0, kyc:0, bank_statement:0, other:0 };
   in7d.forEach(s => { mix[getEvent(s)]++; });
   container.innerHTML = `
     <span class="mix-chip deposit"><i class="fa-solid fa-dollar-sign"></i> Deposits <strong>${mix.deposit}</strong></span>
@@ -400,6 +400,8 @@ function renderMix(container) {
     <span class="mix-chip unblock"><i class="fa-solid fa-unlock"></i> Unlock Withdrawals <strong>${mix.unblock}</strong></span>
     <span class="mix-chip bonus"><i class="fa-solid fa-gift"></i> Bonus Problems <strong>${mix.bonus}</strong></span>
     <span class="mix-chip chat"><i class="fa-solid fa-comments"></i> Live Chats <strong>${mix.chat}</strong></span>
+    <span class="mix-chip kyc"><i class="fa-solid fa-id-card"></i> KYC Problems <strong>${mix.kyc}</strong></span>
+    <span class="mix-chip bank_statement"><i class="fa-solid fa-file-invoice"></i> Bank Statements <strong>${mix.bank_statement}</strong></span>
     <span class="mix-chip other"><i class="fa-solid fa-circle-question"></i> Other <strong>${mix.other}</strong></span>`;
 }
 

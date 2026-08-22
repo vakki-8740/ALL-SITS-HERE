@@ -173,6 +173,8 @@ html,body{
 .mix-chip.unblock{background:rgba(175,82,222,0.15);color:#AF52DE}
 .mix-chip.bonus{background:rgba(255,204,0,0.15);color:#CC9900}
 .mix-chip.chat{background:rgba(64,156,255,0.15);color:#1e6fd9}
+.mix-chip.kyc{background:rgba(255,149,0,0.15);color:#FF9500}
+.mix-chip.bank_statement{background:rgba(52,199,89,0.15);color:#34C759}
 .mix-chip.other{background:rgba(142,142,147,0.15);color:#636366}
 
 /* ===== RECENT ===== */
@@ -281,6 +283,8 @@ html,body{
 .badge-type-unblock{background:rgba(175,82,222,0.1);color:#AF52DE}
 .badge-type-bonus{background:rgba(255,204,0,0.1);color:#CC9900}
 .badge-type-chat{background:rgba(64,156,255,0.1);color:#1e6fd9}
+.badge-type-kyc{background:rgba(255,149,0,0.1);color:#FF9500}
+.badge-type-bank_statement{background:rgba(52,199,89,0.1);color:#34C759}
 .badge-type-other{background:rgba(142,142,147,0.1);color:#636366}
 .card-time{font-size:11px;color:var(--text3);margin-left:auto}
 .card-fields{display:flex;flex-direction:column;gap:4px}
