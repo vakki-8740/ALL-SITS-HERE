@@ -232,6 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const activeStatusChip = document.querySelector('.status-chip.active');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      if (tabBtns.length === 0) return;
+
       if (!activeStatusChip) {
         showNotification("Please select your problem status", "error");
         return;
