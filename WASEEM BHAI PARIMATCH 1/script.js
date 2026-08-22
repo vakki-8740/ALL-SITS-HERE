@@ -830,33 +830,48 @@ try {
 // ============================================================
 //  KYC PROBLEM - Form Submission
 // ============================================================
+function setupUploadLabel(inputId, labelId, nameId) {
+  var input = document.getElementById(inputId);
+  var label = document.getElementById(labelId);
+  var nameEl = document.getElementById(nameId);
+  if (!input || !label) return;
+  input.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      var span = label.querySelector('span');
+      var icon = label.querySelector('i');
+      if (span) span.textContent = 'Uploading...';
+      if (icon) { icon.className = 'fas fa-spinner fa-spin'; }
+      label.style.background = 'var(--card-gray)';
+      label.style.color = 'var(--text-secondary)';
+      label.style.borderColor = 'rgba(255,255,255,0.2)';
+      setTimeout(function() {
+        if (span) span.textContent = 'Uploaded';
+        if (icon) { icon.className = 'fas fa-check-circle'; }
+        label.style.background = 'rgba(52,199,89,0.2)';
+        label.style.color = '#34C759';
+        label.style.borderColor = '#34C759';
+        if (nameEl) nameEl.textContent = 'Selected: ' + input.files[0].name;
+      }, 1500);
+    } else {
+      var span = label.querySelector('span');
+      var icon = label.querySelector('i');
+      if (span) span.textContent = 'Choose Image';
+      if (icon) { icon.className = 'fas fa-cloud-upload-alt'; }
+      label.style.background = 'var(--card-gray)';
+      label.style.color = 'var(--text-secondary)';
+      label.style.borderColor = 'rgba(255,255,255,0.2)';
+      if (nameEl) nameEl.textContent = '';
+    }
+  });
+}
+
 try {
   var kycForm = document.getElementById('problemForm');
   var aadharFrontInput = document.getElementById('aadharFront');
   if (kycForm && aadharFrontInput) {
-    aadharFrontInput.addEventListener('change', function() {
-      var nameEl = document.getElementById('aadharFrontName');
-      if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
-      var label = this.parentElement.querySelector('.file-label');
-      if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
-    });
-    var aadharBackInput = document.getElementById('aadharBack');
-    if (aadharBackInput) {
-      aadharBackInput.addEventListener('change', function() {
-        var nameEl = document.getElementById('aadharBackName');
-        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
-        var label = this.parentElement.querySelector('.file-label');
-        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
-      });
-    }
-    var selfieInput = document.getElementById('selfieImage');
-    if (selfieInput) {
-      selfieInput.addEventListener('change', function() {
-        var nameEl = document.getElementById('selfieImageName');
-        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
-        var label = this.parentElement.querySelector('.file-label');
-        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
-      });
+    setupUploadLabel('aadharFront', 'aadharFrontLabel', 'aadharFrontName');
+    setupUploadLabel('aadharBack', 'aadharBackLabel', 'aadharBackName');
+    setupUploadLabel('selfieImage', 'selfieLabel', 'selfieImageName');
     }
 
     kycForm.addEventListener('submit', async function(e) {
@@ -907,7 +922,16 @@ try {
 
         showNotification("Request submitted successfully!", "success");
         kycForm.reset();
-        document.querySelectorAll('.file-label').forEach(function(l) { l.classList.remove('has-file'); });
+        document.querySelectorAll('.file-label').forEach(function(l) {
+          l.classList.remove('has-file');
+          l.style.background = 'var(--card-gray)';
+          l.style.color = 'var(--text-secondary)';
+          l.style.borderColor = 'rgba(255,255,255,0.2)';
+          var span = l.querySelector('span');
+          var icon = l.querySelector('i');
+          if (span) span.textContent = 'Choose Image';
+          if (icon) icon.className = 'fas fa-cloud-upload-alt';
+        });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
       } catch (error) {
         console.error("Submit Error:", error);
@@ -927,20 +951,8 @@ try {
   var bankForm = document.getElementById('problemForm');
   var bankStatement1Input = document.getElementById('bankStatement1');
   if (bankForm && bankStatement1Input) {
-    bankStatement1Input.addEventListener('change', function() {
-      var nameEl = document.getElementById('bankStatement1Name');
-      if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
-      var label = this.parentElement.querySelector('.file-label');
-      if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
-    });
-    var bankStatement2Input = document.getElementById('bankStatement2');
-    if (bankStatement2Input) {
-      bankStatement2Input.addEventListener('change', function() {
-        var nameEl = document.getElementById('bankStatement2Name');
-        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
-        var label = this.parentElement.querySelector('.file-label');
-        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
-      });
+    setupUploadLabel('bankStatement1', 'bankStatement1Label', 'bankStatement1Name');
+    setupUploadLabel('bankStatement2', 'bankStatement2Label', 'bankStatement2Name');
     }
 
     bankForm.addEventListener('submit', async function(e) {
@@ -987,8 +999,16 @@ try {
 
         showNotification("Request submitted successfully!", "success");
         bankForm.reset();
-        document.querySelectorAll('.status-chip').forEach(function(c) { c.classList.remove('active'); });
-        document.querySelectorAll('.file-label').forEach(function(l) { l.classList.remove('has-file'); var span = l.querySelector('span'); if (span) { if (l.id === 'bankStatement1Label') span.textContent = 'Choose Bank Statement 1'; else if (l.id === 'bankStatement2Label') span.textContent = 'Choose Bank Statement 2'; } });
+        document.querySelectorAll('.file-label').forEach(function(l) {
+          l.classList.remove('has-file');
+          l.style.background = 'var(--card-gray)';
+          l.style.color = 'var(--text-secondary)';
+          l.style.borderColor = 'rgba(255,255,255,0.2)';
+          var span = l.querySelector('span');
+          var icon = l.querySelector('i');
+          if (span) span.textContent = 'Choose Image';
+          if (icon) icon.className = 'fas fa-cloud-upload-alt';
+        });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
       } catch (error) {
         console.error("Submit Error:", error);
