@@ -298,10 +298,10 @@
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
-      border-radius: var(--ios-radius-sm);
-      border: 1px dashed var(--glass-border);
-      background: var(--bg-input);
-      color: var(--text-muted);
+      border-radius: 14px;
+      border: 2px dashed rgba(255,255,255,0.2);
+      background: var(--card-gray);
+      color: var(--text-secondary);
       font-size: 14px;
       font-weight: 500;
       transition: var(--transition);
@@ -319,9 +319,10 @@
     }
 
     .file-label.has-file {
-      border-color: var(--success);
+      border-color: #34C759;
       border-style: solid;
-      background: rgba(52, 199, 89, 0.05);
+      background: rgba(52,199,89,0.2);
+      color: #34C759;
     }
 
     .file-label.has-file i {
@@ -656,10 +657,9 @@
           </div>
           <div class="file-name" id="profileImageName"></div>
         </div>
-        <div class="btn-row">
-          <button class="btn-secondary" id="bStep2Back"><i class="fas fa-arrow-left"></i> Back</button>
-          <button class="btn-primary" id="bStep2Submit">
-            <i class="fas fa-paper-plane"></i> Submit Request
+        <div style="text-align:center;margin-top:16px;">
+          <button class="btn-primary" id="bStep2Submit" style="border-radius:12px;">
+            <i class="fas fa-paper-plane"></i> Submit Now
           </button>
         </div>
       </div>
