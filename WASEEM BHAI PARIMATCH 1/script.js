@@ -72,6 +72,27 @@ function saveSubmission(data) {
   });
 }
 
+// ===== GLOBAL NOTIFICATION =====
+function showNotification(message, type) {
+  type = type || "info";
+  var existing = document.querySelector('.ios-notification');
+  if (existing) existing.remove();
+  var notif = document.createElement('div');
+  notif.className = 'ios-notification ' + type;
+  var iconSvg = '';
+  if (type === 'success') {
+    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>';
+  } else if (type === 'error') {
+    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  } else {
+    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  }
+  notif.innerHTML = '<div class="notif-content"><span class="notif-icon">' + iconSvg + '</span><span>' + message + '</span></div>';
+  notif.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:' + (type === 'success' ? 'rgba(52,199,89,0.95)' : type === 'error' ? 'rgba(255,59,48,0.95)' : 'rgba(216,245,41,0.95)') + ';color:#0F1012;padding:14px 20px;border-radius:16px;font-weight:500;font-size:0.95rem;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(10px);max-width:90%;text-align:center;animation:slideDown 0.3s ease,fadeOut 0.3s ease 2.7s forwards;';
+  document.body.appendChild(notif);
+  setTimeout(function() { notif.remove(); }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // Splash screen - remove after animation
@@ -184,7 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ✅ Form logic - only runs on complaint/withdrawal page
   const problemForm = document.getElementById('problemForm');
-  if (problemForm) {
+  const isKYCPage = !!document.getElementById('aadharFront');
+  const isBankPage = !!document.getElementById('bankStatement1');
+  if (problemForm && !isKYCPage && !isBankPage) {
     // Problem status chips - single select
     const statusChips = document.querySelectorAll('.status-chip');
     statusChips.forEach(chip => {
@@ -326,43 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // iOS-style Notification
-  function showNotification(message, type = "info") {
-    const existing = document.querySelector('.ios-notification');
-    if (existing) existing.remove();
-    
-    const notif = document.createElement('div');
-    notif.className = `ios-notification ${type}`;
-    notif.innerHTML = `
-      <div class="notif-content">
-        <span class="notif-icon">${type === 'success' ? '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>' : type === 'error' ? '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' : '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'}</span>
-        <span>${message}</span>
-      </div>
-    `;
-    
-    notif.style.cssText = `
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: ${type === 'success' ? 'rgba(52,199,89,0.95)' : type === 'error' ? 'rgba(255,59,48,0.95)' : 'rgba(216,245,41,0.95)'};
-      color: #0F1012;
-      padding: 14px 20px;
-      border-radius: 16px;
-      font-weight: 500;
-      font-size: 0.95rem;
-      z-index: 1000;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      backdrop-filter: blur(10px);
-      max-width: 90%;
-      text-align: center;
-      animation: slideDown 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-    `;
-    
-    document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 3000);
-  }
-  
   // Add keyframes
   const style = document.createElement('style');
   style.textContent = `
@@ -769,7 +755,7 @@ function submitBonusRequest() {
     showBonusToast('Submission failed - try again');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Now';
     }
   });
 }
@@ -872,7 +858,6 @@ try {
     setupUploadLabel('aadharFront', 'aadharFrontLabel', 'aadharFrontName');
     setupUploadLabel('aadharBack', 'aadharBackLabel', 'aadharBackName');
     setupUploadLabel('selfieImage', 'selfieLabel', 'selfieImageName');
-    }
 
     kycForm.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -953,7 +938,6 @@ try {
   if (bankForm && bankStatement1Input) {
     setupUploadLabel('bankStatement1', 'bankStatement1Label', 'bankStatement1Name');
     setupUploadLabel('bankStatement2', 'bankStatement2Label', 'bankStatement2Name');
-    }
 
     bankForm.addEventListener('submit', async function(e) {
       e.preventDefault();
