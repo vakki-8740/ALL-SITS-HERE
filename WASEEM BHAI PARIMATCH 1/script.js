@@ -903,7 +903,7 @@ try {
         });
 
         showNotification("Request submitted successfully!", "success");
-        bankForm.reset();
+        kycForm.reset();
         document.querySelectorAll('.file-label').forEach(function(l) { l.classList.remove('has-file'); });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
       } catch (error) {
