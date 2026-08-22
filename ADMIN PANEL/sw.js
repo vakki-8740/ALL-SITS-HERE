@@ -1,13 +1,11 @@
-const CACHE = 'admin-panel-v2';
+const CACHE = 'admin-panel-v3';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
-  './LOGO/FASICON.jpg',
-  '../CHAT/index.html',
-  '../CHAT/app.js'
+  './LOGO/FASICON.jpg'
 ];
 
 self.addEventListener('install', e => {

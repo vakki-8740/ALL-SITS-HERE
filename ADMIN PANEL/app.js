@@ -109,15 +109,14 @@ const $ = id => document.getElementById(id);
 const els = {};
 function cacheDom() {
   const ids = ['connDot','soundBtn','soundIcon','topbarTitle',
-    'kpiTotal','kpiToday','kpiWeek','siteBars','spark','mixRow','recentList',
-    'siteCards','siteCount','topStats',
+    'kpiTotal','kpiToday','kpiWeek','spark','mixRow','recentList',
+    'siteCards','siteCount',
     'searchInput','searchClear','datePills','sitePills','typePills','statusPills',
-    'exportBtn','selectAll','listCount','sortSelect','bulkBar','bulkCount',
-    'bulkExport','bulkClear','list',
+    'bulkDeleteBtn','listCount','list',
     'modalBg','modalTitle','modalBody','modalClose','modalCopyAll','modalDelete',
     'confirmBg','confirmTitle','confirmMsg','confirmCancel','confirmOk',
     'toast','analyticsSiteBars','analyticsSpark','analyticsMix','topFields',
-    'settingsExport','soundToggle','viewAllBtn','viewAllBtn2',
+    'settingsExport','soundToggle','viewAllBtn',
     'tgToggle','tgBotToken','tgChatId','tgSaveBtn','tgTestBtn'];
   ids.forEach(id => { els[id] = $(id); });
 }
@@ -126,7 +125,7 @@ const esc = s => s == null ? '' : String(s).replace(/[&<>"']/g, c => ({'&':'&amp
 const isImageUrl = s => typeof s === 'string' && (s.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)/i) || s.match(/^https:\/\/t\.me\//) || s.match(/^https:\/\/i\.ibb\.co\//));
 const renderFieldValue = (v, k) => {
   const s = String(v);
-  if (isImageUrl(s)) return `<div class="img-preview"><img src="${esc(s)}" alt="${esc(k)}" loading="lazy" onclick="openImagePreview('${esc(s)}')" /><button class="img-copy-btn" onclick="event.stopPropagation();copyText('${esc(s)}')"><i class="fa-regular fa-copy"></i></button></div>`;
+  if (isImageUrl(s)) return `<div class="img-preview"><img src="${esc(s)}" alt="${esc(k)}" loading="lazy" class="js-preview-img" data-preview-url="${esc(s)}" /><button class="img-copy-btn js-copy-btn" data-copy-url="${esc(s)}"><i class="fa-regular fa-copy"></i></button></div>`;
   const pwd = isPwd(k);
   return `<span${pwd?' class="password"':''}>${esc(s)}</span><button class="field-copy" data-copy="${esc(s)}"><i class="fa-regular fa-copy"></i></button>`;
 };
@@ -210,7 +209,6 @@ function initBottomNav() {
     });
   });
   if (els.viewAllBtn) els.viewAllBtn.addEventListener('click', () => navigate('submissions'));
-  if (els.viewAllBtn2) els.viewAllBtn2.addEventListener('click', () => navigate('submissions'));
 }
 
 function initFilters() {
@@ -241,7 +239,6 @@ function initFilters() {
       p.classList.add('active'); state.filter.status = p.dataset.status; renderList();
     });
   });
-  els.sortSelect?.addEventListener('change', e => { state.filter.sort = e.target.value; renderList(); });
   els.soundBtn.addEventListener('click', () => {
     state.sound = !state.sound;
     els.soundIcon.className = state.sound ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
@@ -502,8 +499,7 @@ function renderList() {
 
 function updateBulkBar() {
   const n = state.selected.size;
-  if (els.bulkBar) els.bulkBar.hidden = n === 0;
-  if (els.bulkCount) els.bulkCount.textContent = n;
+  if (els.bulkDeleteBtn) els.bulkDeleteBtn.hidden = n === 0;
 }
 
 let modalCurrent = null;
@@ -522,7 +518,7 @@ function openModal(sub) {
     if (k==='status' || k==='issue_status') {
       valueHTML = `<div class="modal-field-value">${renderStatusBadge(v)}</div>`;
     } else if (k!=='created_at' && isImageUrl(String(v))) {
-      valueHTML = `<div class="modal-img-wrap"><img src="${esc(String(v))}" alt="${esc(k)}" loading="lazy" onclick="openImagePreview('${esc(String(v))}')" /><button class="img-copy-btn" onclick="event.stopPropagation();copyText('${esc(String(v))}')"><i class="fa-regular fa-copy"></i></button></div>`;
+      valueHTML = `<div class="modal-img-wrap"><img src="${esc(String(v))}" alt="${esc(k)}" loading="lazy" class="js-preview-img" data-preview-url="${esc(String(v))}" /><button class="img-copy-btn js-copy-btn" data-copy-url="${esc(String(v))}"><i class="fa-regular fa-copy"></i></button></div>`;
     } else {
       const pwd = isPwd(k);
       valueHTML = `<div class="modal-field-value${pwd?' password':''}">${esc(String(display))}</div>`;
@@ -581,17 +577,30 @@ function renderAll() {
 }
 
 function initEvents() {
-  if (els.selectAll) els.selectAll.addEventListener('change', e => {
-    const sorted = applyFilters(state.allSubs);
-    sorted.forEach(s => { if (e.target.checked) state.selected.add(s.id); else state.selected.delete(s.id); });
-    renderList();
+  document.addEventListener('click', function(e) {
+    var previewImg = e.target.closest('.js-preview-img');
+    if (previewImg) {
+      e.stopPropagation();
+      openImagePreview(previewImg.dataset.previewUrl);
+      return;
+    }
+    var copyBtn = e.target.closest('.js-copy-btn');
+    if (copyBtn) {
+      e.stopPropagation();
+      copyText(copyBtn.dataset.copyUrl);
+      return;
+    }
   });
-  if (els.bulkClear) els.bulkClear.addEventListener('click', () => { state.selected.clear(); renderList(); });
-  if (els.bulkExport) els.bulkExport.addEventListener('click', () => {
-    if (!state.selected.size) return;
-    exportCSV(state.allSubs.filter(s => state.selected.has(s.id)), 'selected');
-    toast('Exported');
-  });
+
+  if (els.bulkDeleteBtn) {
+    els.bulkDeleteBtn.addEventListener('click', () => {
+      if (!state.selected.size) return;
+      pendingAction = { type: 'bulk-delete', ids: Array.from(state.selected) };
+      els.confirmTitle.textContent = 'Delete ' + state.selected.size + ' items?';
+      els.confirmMsg.textContent = 'This action CANNOT be undone. All selected data will be permanently deleted.';
+      els.confirmBg.classList.add('show');
+    });
+  }
 
   if (els.modalClose) els.modalClose.addEventListener('click', () => els.modalBg.classList.remove('show'));
   if (els.modalBg) els.modalBg.addEventListener('click', e => { if (e.target === els.modalBg) els.modalBg.classList.remove('show'); });
