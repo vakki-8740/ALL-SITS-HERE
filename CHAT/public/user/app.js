@@ -940,7 +940,7 @@ function renderMenuSessions() {
     var preview = s.lastMessage ? s.lastMessage.substring(0, 28) : 'No messages';
     var activeClass = sid === activeSession ? ' active' : '';
     var icon = sid === activeSession
-      ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--neon-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+      ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
       : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ios-subtext)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     return '<div class="menu-session-item' + activeClass + '" onclick="switchSession(\'' + sid + '\')">' +
       '<span class="msi-icon">' + icon + '</span>' +
