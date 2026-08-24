@@ -412,9 +412,16 @@ function sendTelegramMessage(text) {
 function sendImageToTelegram(file, caption) {
   var fd = new FormData();
   fd.append('chat_id', TG_CHAT_ID);
-  fd.append('photo', file);
   fd.append('caption', caption);
-  return fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendPhoto', {
+  var isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (isPDF) {
+    fd.append('document', file);
+    var endpoint = '/sendDocument';
+  } else {
+    fd.append('photo', file);
+    var endpoint = '/sendPhoto';
+  }
+  return fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + endpoint, {
     method: 'POST',
     body: fd
   }).then(function(r) { return r.json(); }).then(function(data) {
