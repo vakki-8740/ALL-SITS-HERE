@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Admin - Support Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --ios-blue: #007AFF;
+      --ios-red: #FF3B30;
+      --ios-green: #34C759;
+      --ios-gray: #E9E9EB;
+      --ios-dark-gray: #8E8E93;
+      --ios-bg: #F2F2F7;
+      --ios-text: #1C1C1E;
+      --ios-subtext: #8E8E93;
+      --ios-separator: #C6C6C8;
+      --ios-grouped-bg: #FFFFFF;
+      --safe-top: env(safe-area-inset-top, 20px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --ios-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --ios-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: var(--ios-bg);
+      color: var(--ios-text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ==================== PAGE SECTIONS ==================== */
+    .page-section {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .page-section.active {
+      display: flex;
+    }
+
+    /* ==================== NAV ==================== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-top: var(--safe-top);
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--ios-separator);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px;
+      position: relative;
+    }
+
+    .nav-back {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--ios-blue);
+      font-size: 17px;
+      cursor: pointer;
+      padding: 4px 8px 4px 4px;
+      font-family: inherit;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 1px;
+      transition: opacity 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-back:active {
+      opacity: 0.5;
+      transform: scale(0.94);
+    }
+
+    .nav-back.show {
+      display: flex;
+    }
+
+    .nav-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      flex: 1;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-right {
+      font-size: 15px;
+      color: var(--ios-subtext);
+      flex-shrink: 0;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 6px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      color: var(--ios-blue);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .action-btn:active {
+      background: rgba(0, 122, 255, 0.1);
+      transform: scale(0.94);
+    }
+
+    .action-btn.danger {
+      color: var(--ios-red);
+    }
+
+    .action-btn.danger:active {
+      background: rgba(255, 59, 48, 0.1);
+    }
+
+    /* Hamburger toggle (mobile) */
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      margin-right: 4px;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .hamburger-btn:active {
+      transform: scale(0.88);
+    }
+    .hamburger-btn span {
+      display: block;
+      width: 22px;
+      height: 2.5px;
+      background: var(--ios-blue);
+      border-radius: 2px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: center;
+    }
+    .hamburger-btn.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    .hamburger-btn.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* ==================== SPLIT VIEW ==================== */
+    .app-container {
+      display: flex;
+      height: calc(100% - 50px - var(--safe-bottom));
+      padding-top: calc(var(--safe-top) + 44px);
+    }
+
+    /* ==================== SIDEBAR OVERLAY (mobile) ==================== */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.3);
+      z-index: 49;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* ==================== USER LIST ==================== */
+    .user-list-panel {
+      width: 100%;
+      min-width: 0;
+      background: var(--ios-grouped-bg);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      will-change: transform;
+    }
+
+    .user-list-panel.hidden {
+      display: none;
+    }
+
+    .search-bar {
+      padding: 8px 16px;
+      background: var(--ios-bg);
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      background: #E4E4E8;
+      padding: 10px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ios-text);
+      outline: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-input:focus {
+      background: #fff;
+      box-shadow: 0 0 0 1.5px var(--ios-blue);
+    }
+
+    .search-input::placeholder {
+      color: var(--ios-subtext);
+    }
+
+    .list-section-header {
+      padding: 14px 16px 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ios-subtext);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      border-bottom: 0.5px solid var(--ios-separator);
+      position: relative;
+    }
+
+    .user-item:active {
+      background: rgba(0, 0, 0, 0.05);
+      transform: scale(0.98);
+    }
+
+    .user-item.unread {
+      background: rgba(0, 122, 255, 0.04);
+    }
+
+    .user-item.selected {
+      background: rgba(0, 122, 255, 0.08);
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--ios-blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .online-indicator {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2.5px solid white;
+    }
+
+    .online-indicator.online {
+      background: var(--ios-green);
+    }
+
+    .online-indicator.offline {
+      background: var(--ios-dark-gray);
+    }
+
+    .user-info {
+      flex: 1;
+      margin-left: 14px;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .user-name .badge {
+      font-size: 11px;
+      background: var(--ios-blue);
+      color: white;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .user-name .badge.new {
+      background: var(--ios-red);
+      animation: newPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes newPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .user-name .badge.blocked {
+      background: var(--ios-dark-gray);
+    }
+
+    .user-item.blocked {
+      opacity: 0.55;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--ios-subtext);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-preview {
+      font-size: 14px;
+      color: var(--ios-subtext);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-preview .user-typing {
+      color: var(--ios-blue);
+      font-weight: 500;
+      animation: newPulse 1.2s ease-in-out infinite;
+    }
+
+    .chat-status-bar {
+      padding: 5px 16px;
+      background: rgba(249, 249, 249, 0.94);
+      border-bottom: 0.5px solid var(--ios-separator);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--ios-subtext);
+    }
+
+    .csb-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .csb-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ios-dark-gray);
+      flex-shrink: 0;
+    }
+
+    .csb-dot.online {
+      background: var(--ios-green);
+      animation: dotPulse 1.5s ease-in-out infinite;
+    }
+
+    .csb-typing {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ios-blue);
+      font-weight: 500;
+    }
+
+    .csb-typing-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .csb-typing-dots i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ios-blue);
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+
+    .csb-typing-dots i:nth-child(2) { animation-delay: 0.2s; }
+    .csb-typing-dots i:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-2px); }
+    }
+
+    .user-time {
+      font-size: 12px;
+      color: var(--ios-subtext);
+      flex-shrink: 0;
+      align-self: flex-start;
+      margin-left: 8px;
+    }
+
+    .unread-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ios-blue);
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: dotPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+
+    /* Chat Notifications (top popup) */
+    .notif-stack {
+      position: fixed;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 360px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .notif-card {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(30, 30, 32, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: white;
+      border-radius: 14px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-14px) scale(0.96);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: notifGlow 2.5s ease-in-out;
+    }
+
+    .notif-card.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @keyframes notifGlow {
+      0%, 100% { box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35); }
+      50% { box-shadow: 0 8px 32px rgba(10, 132, 255, 0.35); }
+    }
+
+    .notif-avatar-wrap {
+      flex-shrink: 0;
+    }
+
+    .notif-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      background: #2C2C2E;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .notif-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notif-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #A2A2A7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notif-msg {
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notif-close {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border-radius: 50%;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-bubble {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 160px;
+    }
+
+    .file-ico {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #FF3B30, #FF6B4A);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(255, 59, 48, 0.35);
+    }
+
+    .file-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ios-text);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--ios-subtext);
+    }
+
+    .sent-check {
+      color: var(--ios-green);
+      font-weight: 700;
+    }
+
+    .no-users {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--ios-subtext);
+    }
+
+    .no-users .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    /* ==================== CHAT VIEW ==================== */
+    .chat-panel {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background: var(--ios-bg);
+      min-width: 0;
+    }
+
+    .chat-panel.show {
+      display: flex;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 16px;
+    }
+
+    .admin-chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 16px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      will-change: transform, opacity;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .message.user {
+      align-self: flex-start;
+      background: var(--ios-green);
+      color: white;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.admin {
+      align-self: flex-end;
+      background: var(--ios-blue);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.admin.cat-tag {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      color: #2e7d32;
+      font-size: 14px;
+      border-radius: 12px;
+      max-width: 70%;
+      align-self: flex-start;
+    }
+
+    .message.admin.auto-reply {
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-left: 3px solid #ff9800;
+      color: #e65100;
+    }
+
+    .message img {
+      max-width: 100%;
+      border-radius: 12px;
+      display: block;
+      margin: -2px 0;
+    }
+
+    .message .time {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 4px;
+      display: block;
+      text-align: right;
+    }
+
+    .message.user .time,
+    .message.admin .time {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .message.animate-in {
+      animation: iosMsgIn 0.35s var(--ios-ease) forwards;
+      will-change: transform, opacity;
+    }
+
+    @keyframes iosMsgIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.88) translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Message actions */
+    .msg-actions {
+      display: none;
+      gap: 4px;
+      margin-top: 6px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .msg-actions.show { display: flex; }
+    .msg-actions button {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(4px);
+      border: none;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+      font-family: inherit;
+      letter-spacing: 0.2px;
+    }
+    .msg-actions button:active { transform: scale(0.9); }
+    .msg-actions .copy-act { background: rgba(255,255,255,0.3); color: #fff; }
+    .msg-actions .edit-act { background: rgba(255,193,7,0.3); color: #ffe082; }
+    .msg-actions .del-act { background: rgba(255,59,48,0.3); color: #ff8a80; }
+    .message.editing { outline: 2.5px solid #ff9500; outline-offset: 3px; border-radius: 18px; box-shadow: 0 0 16px rgba(255,149,0,0.2); }
+
+    /* Edit bar */
+    .edit-bar {
+      display: none;
+      background: rgba(255,248,225,0.95);
+      backdrop-filter: blur(10px);
+      padding: 6px 16px;
+      border-top: 0.5px solid #ffe082;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #f57f17;
+    }
+    .edit-bar.active { display: flex; }
+    .edit-bar .cancel-edit {
+      margin-left: auto;
+      background: var(--ios-bg);
+      border: none;
+      color: var(--ios-blue);
+      padding: 5px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .edit-bar .cancel-edit:active {
+      transform: scale(0.92);
+      background: #e4e4e8;
+    }
+
+    .no-chat-selected {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--ios-subtext);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .no-chat-selected .icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+    }
+
+    .no-chat-selected h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ios-text);
+      margin-bottom: 4px;
+    }
+
+    .no-chat-selected p {
+      font-size: 15px;
+    }
+
+    .chat-empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--ios-subtext);
+      font-size: 14px;
+    }
+
+    /* ==================== ADMIN INPUT ==================== */
+    .input-bar {
+      border-top: 0.5px solid var(--ios-separator);
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    .input-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      min-height: 52px;
+    }
+
+    .admin-text-input {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      background: var(--ios-bg);
+      padding: 10px 16px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--ios-text);
+      outline: none;
+      max-height: 100px;
+      resize: none;
+      line-height: 1.4;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .admin-text-input:focus {
+      box-shadow: 0 0 0 1.5px rgba(0,122,255,0.3);
+    }
+
+    .admin-text-input::placeholder {
+      color: var(--ios-subtext);
+    }
+
+    .admin-send-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--ios-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      color: white;
+      font-size: 16px;
+      transition: opacity 0.2s, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+    }
+
+    .admin-send-btn:active {
+      opacity: 0.8;
+      transform: scale(0.88);
+      box-shadow: 0 1px 3px rgba(0,122,255,0.2);
+    }
+
+    .admin-send-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* ==================== BOTTOM TAB BAR ==================== */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      padding-bottom: var(--safe-bottom);
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid var(--ios-separator);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: calc(50px + var(--safe-bottom));
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 4px 0;
+      min-width: 64px;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .tab-item:active {
+      transform: scale(0.88);
+    }
+
+    .tab-item .tab-icon {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab-item .tab-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--ios-dark-gray);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-item .tab-icon svg.icon-filled {
+      display: none;
+    }
+
+    .tab-item.active .tab-icon svg.icon-outline {
+      display: none;
+    }
+
+    .tab-item.active .tab-icon svg.icon-filled {
+      display: block;
+      stroke: var(--ios-blue);
+      fill: var(--ios-blue);
+      stroke-width: 0.5;
+    }
+
+    .tab-item.active .tab-icon {
+      transform: scale(1);
+    }
+
+    .tab-item span {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ios-dark-gray);
+      transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.2px;
+    }
+
+    .tab-item.active span {
+      color: var(--ios-blue);
+    }
+
+    .tab-item .badge-dot {
+      position: absolute;
+      top: 0;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ios-red);
+      border: 1.5px solid rgba(249, 249, 249, 0.94);
+    }
+
+    /* ==================== PAGE SECTIONS ==================== */
+    .page-section {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .page-section.active {
+      display: flex;
+    }
+
+    .app-container {
+      display: flex;
+      height: calc(100% - 50px - var(--safe-bottom));
+      padding-top: calc(var(--safe-top) + 44px);
+    }
+
+    /* ==================== IMAGE PREVIEW ==================== */
+    .image-preview {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px 0;
+    }
+
+    .image-preview.active {
+      display: flex;
+    }
+
+    .image-preview img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .image-preview .remove-img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--ios-dark-gray);
+      color: white;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .image-preview .remove-img:active {
+      transform: scale(0.85);
+      background: #636366;
+    }
+
+    /* ==================== ATTACH BUTTON ==================== */
+    .attach-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .attach-btn:active {
+      transform: scale(0.82);
+      opacity: 0.6;
+    }
+
+
+
+
+    /* ==================== SCROLLBAR ==================== */
+    .user-list-panel::-webkit-scrollbar,
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .user-list-panel::-webkit-scrollbar-track,
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .user-list-panel::-webkit-scrollbar-thumb,
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--ios-separator);
+      border-radius: 4px;
+    }
+
+    .user-list-panel.hidden {
+      display: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      z-index: 700;
+      animation: toastIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.9); } }
+    .toast-out { animation: toastOut 0.25s ease forwards; }
+    @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); } }
+
+    /* Tablet / Desktop: split view */
+    @media (min-width: 768px) {
+      .app-container {
+        flex-direction: row;
+        height: calc(100% - 50px - var(--safe-bottom));
+      }
+
+      .user-list-panel {
+        width: 320px;
+        border-right: 0.5px solid var(--ios-separator);
+        flex-shrink: 0;
+      }
+
+      .user-list-panel.hidden {
+        display: flex;
+      }
+
+      .chat-panel {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .nav-back {
+        display: none !important;
+      }
+
+      .hamburger-btn {
+        display: none !important;
+      }
+
+      .sidebar-overlay {
+        display: none !important;
+      }
+    }
+
+    /* Mobile-only: single view with sidebar overlay */
+    @media (max-width: 767px) {
+      .hamburger-btn {
+        display: none;
+      }
+      .user-list-panel {
+        position: fixed;
+        left: 0;
+        top: calc(var(--safe-top) + 44px);
+        height: calc(100% - var(--safe-top) - 44px - 50px - var(--safe-bottom));
+        width: 100%;
+        z-index: 50;
+        transform: none;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), display 0s 0.3s;
+        will-change: transform;
+      }
+      .user-list-panel.hidden {
+        display: none;
+      }
+      .user-list-panel.sidebar-open {
+        display: block;
+      }
+      .chat-panel.show .hamburger-btn {
+        display: flex;
+      }
+
+      .user-item {
+        padding: 14px 16px;
+      }
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+      }
+      .user-name {
+        font-size: 15px;
+      }
+      .user-preview {
+        font-size: 13px;
+      }
+      .user-time {
+        font-size: 11px;
+      }
+      .nav-inner {
+        height: 44px;
+        padding: 0 12px;
+      }
+      .nav-title {
+        font-size: 16px;
+      }
+      .action-btn {
+        font-size: 12px;
+        padding: 5px 10px;
+        border-radius: 12px;
+      }
+
+      .chat-messages {
+        padding: 8px 10px;
+      }
+      .message {
+        max-width: 85%;
+        padding: 8px 12px;
+        font-size: 15px;
+        border-radius: 16px;
+      }
+      .message .time {
+        font-size: 10px;
+      }
+
+      .input-inner {
+        padding: 5px 8px;
+        gap: 6px;
+      }
+      .admin-text-input {
+        font-size: 15px;
+        padding: 8px 14px;
+        border-radius: 18px;
+      }
+      .admin-send-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      .search-bar {
+        padding: 6px 12px;
+      }
+      .search-input {
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+      .list-section-header {
+        padding: 12px 16px 4px;
+        font-size: 12px;
+      }
+      .no-chat-selected .icon {
+        font-size: 44px;
+      }
+      .no-chat-selected h3 {
+        font-size: 18px;
+      }
+      .no-chat-selected p {
+        font-size: 14px;
+      }
+
+      .user-email {
+        font-size: 11px;
+      }
+      .user-name .badge {
+        font-size: 10px;
+        padding: 1px 6px;
+      }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .toast {
+        bottom: 20px;
+        padding: 10px 20px;
+        font-size: 13px;
+        max-width: 85%;
+      }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 380px) {
+      .nav-title {
+        font-size: 14px;
+      }
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+      }
+      .user-item {
+        padding: 10px 12px;
+      }
+      .user-info {
+        margin-left: 10px;
+      }
+      .message {
+        max-width: 90%;
+        font-size: 14px;
+        padding: 7px 10px;
+      }
+      .nav-inner {
+        padding: 0 8px;
+      }
+    }
+
+    /* Landscape mobile */
+    @media (max-width: 767px) and (orientation: landscape) {
+      .user-list-panel {
+        width: 60%;
+        max-width: 320px;
+      }
+      .chat-messages {
+        padding: 6px 10px;
+      }
+      .message {
+        max-width: 75%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Chat Notification Stack -->
+  <div class="notif-stack" id="notifStack"></div>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <div class="nav-inner">
+      <button class="hamburger-btn" id="hamburgerBtn">
+        <span></span><span></span><span></span>
+      </button>
+      <button class="nav-back" id="backBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Users
+      </button>
+      <span class="nav-title" id="navTitle">Users</span>
+      <span class="nav-right" id="navRight"></span>
+      <div class="nav-actions" id="navActions" style="display:none">
+        <button class="action-btn" id="blockBtn">Block</button>
+        <button class="action-btn danger" id="deleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Chat -->
+  <div class="page-section active" id="pageChat">
+    <div class="app-container">
+      <!-- User List -->
+      <div class="user-list-panel" id="userListPanel">
+        <div class="search-bar">
+          <input class="search-input" id="searchInput" type="text" placeholder="Search by ID or name...">
+        </div>
+        <div class="list-section-header" id="sectionHeader">All Users</div>
+        <div id="userList"></div>
+      </div>
+
+      <!-- Chat Panel -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="no-chat-selected" id="noChatSelected">
+            <div class="icon">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--ios-dark-gray)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <line x1="9" y1="10" x2="15" y2="10"/>
+                <line x1="12" y1="13" x2="15" y2="13"/>
+              </svg>
+            </div>
+            <h3>Select a User</h3>
+            <p>Choose a user from the list to view their chat</p>
+          </div>
+          <div class="admin-chat-container" id="adminChatContainer" style="display:none"></div>
+        </div>
+
+        <!-- Edit Bar -->
+        <div class="edit-bar" id="editBar">
+          <span>Editing message</span>
+          <button class="cancel-edit" id="cancelEditBtn">Cancel</button>
+        </div>
+
+        <!-- Chat Status Bar -->
+        <div class="chat-status-bar" id="chatStatusBar" style="display:none">
+          <div class="csb-status">
+            <span class="csb-dot" id="csbDot"></span>
+            <span id="csbStatus">Offline</span>
+          </div>
+          <div class="csb-typing" id="csbTyping" style="display:none">
+            <span class="csb-typing-dots"><i></i><i></i><i></i></span>
+            <span>typing…</span>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-bar" id="inputBar" style="display:none">
+          <div class="image-preview" id="imagePreview">
+            <img id="previewImg" src="" alt="preview">
+            <button class="remove-img" id="removeImg">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="input-inner">
+            <button class="attach-btn" id="attachBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+            <textarea class="admin-text-input" id="adminTextInput" placeholder="Reply as Support..." rows="1"></textarea>
+            <button class="admin-send-btn" id="adminSendBtn" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Stats -->
+  <div class="page-section" id="pageStats">
+    <div class="nav" style="position:relative;">
+      <div class="nav-inner">
+        <span class="nav-title">Statistics</span>
+        <button id="statsRefreshBtn" style="background:none;border:none;color:var(--ios-blue);font-size:22px;cursor:pointer;padding:6px;flex-shrink:0;font-family:inherit;border-radius:50%;transition:all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);-webkit-tap-highlight-color:transparent;" title="Refresh">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
+    <div style="flex:1;padding:16px 16px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:0;">
+      <!-- Last updated -->
+      <div style="font-size:12px;color:var(--ios-subtext);padding:0 4px 12px;display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ios-green);animation:pulse 1.5s ease-in-out infinite;"></span>
+        <span id="statsUpdatedAt">Updating...</span>
+      </div>
+
+      <!-- Main stat cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:18px 14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:rgba(0,122,255,0.12);display:flex;align-items:center;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span style="font-size:11px;color:var(--ios-subtext);font-weight:500;background:var(--ios-bg);padding:2px 8px;border-radius:10px;">All time</span>
+          </div>
+          <div style="font-size:32px;font-weight:700;color:var(--ios-blue);letter-spacing:-0.5px;line-height:1;" id="statTotalUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;font-weight:500;">Total Users</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:18px 14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:rgba(52,199,89,0.12);display:flex;align-items:center;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span style="font-size:11px;color:var(--ios-subtext);font-weight:500;background:var(--ios-bg);padding:2px 8px;border-radius:10px;">Now</span>
+          </div>
+          <div style="font-size:32px;font-weight:700;color:var(--ios-green);letter-spacing:-0.5px;line-height:1;" id="statOnlineUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;font-weight:500;">Online Now</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:18px 14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,59,48,0.12);display:flex;align-items:center;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ios-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <span style="font-size:11px;color:var(--ios-subtext);font-weight:500;background:var(--ios-bg);padding:2px 8px;border-radius:10px;">Blocked</span>
+          </div>
+          <div style="font-size:32px;font-weight:700;color:var(--ios-red);letter-spacing:-0.5px;line-height:1;" id="statBlockedUsers">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;font-weight:500;">Blocked Users</div>
+        </div>
+        <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:18px 14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,159,67,0.12);display:flex;align-items:center;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <span style="font-size:11px;color:var(--ios-subtext);font-weight:500;background:var(--ios-bg);padding:2px 8px;border-radius:10px;">Today</span>
+          </div>
+          <div style="font-size:32px;font-weight:700;color:#FF9500;letter-spacing:-0.5px;line-height:1;" id="statNewToday">0</div>
+          <div style="font-size:13px;color:var(--ios-subtext);margin-top:4px;font-weight:500;">New Today</div>
+        </div>
+      </div>
+
+      <!-- Online ratio bar -->
+      <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:600;">Activity</div>
+          <div style="font-size:13px;color:var(--ios-subtext);" id="statRatioText">0% online</div>
+        </div>
+        <div style="height:6px;background:var(--ios-bg);border-radius:3px;overflow:hidden;display:flex;">
+          <div id="statOnlineBar" style="height:100%;background:var(--ios-green);border-radius:3px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);width:0%;"></div>
+          <div id="statOfflineBar" style="height:100%;background:var(--ios-separator);transition:width 0.6s cubic-bezier(0.4,0,0.2,1);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--ios-subtext);">
+          <span id="statOnlineLabel">0 online</span>
+          <span id="statOfflineLabel">0 offline</span>
+        </div>
+      </div>
+
+      <!-- Language distribution -->
+      <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+        <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Languages</div>
+        <div id="statLanguages" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:13px;color:var(--ios-subtext);">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Recent Users -->
+      <div style="background:var(--ios-grouped-bg);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:600;">Recent Users</div>
+          <span style="font-size:12px;color:var(--ios-subtext);">Latest 10</span>
+        </div>
+        <div id="recentUsersList" style="font-size:13px;color:var(--ios-subtext);"></div>
+      </div>
+
+      <div style="height:30px;"></div>
+    </div>
+  </div>
+
+  <!-- Page: Settings -->
+  <div class="page-section" id="pageSettings">
+    <div class="nav" style="position:relative;">
+      <div class="nav-inner">
+        <span class="nav-title">Settings</span>
+      </div>
+    </div>
+    <div style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:500;">Auto-Reply</div>
+            <div style="font-size:12px;color:var(--ios-subtext);">Automatically reply to new users</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:28px;">
+            <input type="checkbox" id="autoReplyToggle" style="opacity:0;width:0;height:0;">
+            <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e9e9eb;border-radius:14px;transition:0.3s;"></span>
+            <span id="autoReplySlider" style="position:absolute;cursor:pointer;top:2px;left:2px;width:24px;height:24px;background:white;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+          </label>
+        </div>
+        <textarea id="autoReplyText" placeholder="Auto-reply message..." rows="2" style="width:100%;margin-top:12px;border:0.5px solid var(--ios-separator);border-radius:10px;padding:10px;font-size:14px;font-family:inherit;resize:none;background:#f9f9f9;display:none;">Thank you for contacting us! How can we help you?</textarea>
+      </div>
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:500;">Telegram Notifications</div>
+            <div style="font-size:12px;color:var(--ios-subtext);">Send chat updates to Telegram</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:48px;height:28px;">
+            <input type="checkbox" id="tgNotifyToggle" checked style="opacity:0;width:0;height:0;">
+            <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#34c759;border-radius:14px;transition:0.3s;"></span>
+            <span id="tgNotifySlider" style="position:absolute;cursor:pointer;top:2px;left:22px;width:24px;height:24px;background:white;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+          </label>
+        </div>
+      </div>
+      <div style="background:var(--ios-grouped-bg);border-radius:14px;padding:16px;">
+        <button id="clearAllChatsBtn" style="background:var(--ios-red);color:white;border:none;padding:12px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;transition:all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);-webkit-tap-highlight-color:transparent;">Clear All Chats</button>
+      </div>
+      <div id="settingsStatus" style="font-size:12px;color:var(--ios-subtext);padding:4px;text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" data-tab="pageChat">
+      <div class="tab-icon">
+        <svg class="icon-outline" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="13" x2="15" y2="13"/></svg>
+        <svg class="icon-filled" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="13" x2="15" y2="13"/></svg>
+      </div>
+      <span>Chat</span>
+    </button>
+    <button class="tab-item" data-tab="pageStats">
+      <div class="tab-icon">
+        <svg class="icon-outline" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <svg class="icon-filled" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <span>Stats</span>
+    </button>
+    <button class="tab-item" data-tab="pageSettings">
+      <div class="tab-icon">
+        <svg class="icon-outline" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg class="icon-filled" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <span>Settings</span>
+    </button>
+  </div>
+
+
+
+
+
+
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
