@@ -208,15 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const isKYCPage = !!document.getElementById('aadharFront');
   const isBankPage = !!document.getElementById('bankStatement1');
   if (problemForm && !isKYCPage && !isBankPage) {
-    // Problem status chips - single select
-    const statusChips = document.querySelectorAll('.status-chip');
-    statusChips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        statusChips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-      });
-    });
-
     const tabBtns = document.querySelectorAll('.tab-btn');
     const depositFields = document.getElementById('depositFields');
     const withdrawalFields = document.getElementById('withdrawalFields');
@@ -254,11 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
     problemForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const activeStatusChip = document.querySelector('.status-chip.active');
+      const problemStatus = document.getElementById('problemStatus');
       const tabBtns = document.querySelectorAll('.tab-btn');
       if (tabBtns.length === 0) return;
 
-      if (!activeStatusChip) {
+      if (!problemStatus || !problemStatus.value) {
         showNotification("Please select your problem status", "error");
         return;
       }
@@ -320,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
           password: password,
           description: description,
           type: type === 'deposit' ? 'Deposit Problem' : 'Withdrawal Problem',
-          issue_status: activeStatusChip.dataset.status,
+          issue_status: problemStatus.value,
           amount: amount,
           utr: utr || 'N/A',
           withdraw_method: method || 'Not specified',
@@ -331,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
-        statusChips.forEach(c => c.classList.remove('active'));
         if (depositFields) depositFields.classList.add('active');
         if (withdrawalFields) withdrawalFields.classList.remove('active');
         const dTab = document.querySelector('[data-tab="deposit"]');
