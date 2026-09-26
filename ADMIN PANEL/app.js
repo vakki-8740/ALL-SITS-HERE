@@ -122,7 +122,7 @@ function cacheDom() {
 }
 
 const esc = s => s == null ? '' : String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const isImageUrl = s => typeof s === 'string' && (s.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)/i) || s.match(/^https:\/\/t\.me\//) || s.match(/^https:\/\/i\.ibb\.co\//));
+const isImageUrl = s => typeof s === 'string' && (s.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)/i) || s.match(/^https:\/\/i\.ibb\.co\//));
 const renderFieldValue = (v, k) => {
   const s = String(v);
   if (isImageUrl(s)) return `<div class="img-preview"><img src="${esc(s)}" alt="${esc(k)}" loading="lazy" class="js-preview-img" data-preview-url="${esc(s)}" /><button class="img-copy-btn js-copy-btn" data-copy-url="${esc(s)}"><i class="fa-regular fa-copy"></i></button></div>`;
@@ -270,7 +270,7 @@ function applyFilters(list) {
     if (state.filter.type !== 'all' && getEvent(s) !== state.filter.type) return false;
     if (state.filter.status !== 'all' && (s.status || s.issue_status) !== state.filter.status) return false;
     if (q) {
-      const hay = [s.email,s.mobile,s.login_id,s.user_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.username,s.uid,s.verify_email,s.verify_value,s.verify_method,s.issue_type,s.status,s.issue_status,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
+      const hay = [s.email,s.mobile,s.phone,s.login_id,s.user_id,s.username,s.user_name,s.name,s.account_number,s.game_uid,s.reqId,s.request_id,s.gameid,s.game_id,s.amount,s.utr,s.type,s.description,s.uid,s.verify_email,s.verify_value,s.verify_method,s.issue_type,s.status,s.issue_status,s.site_id,s.id].map(v => (v==null?'':String(v)).toLowerCase()).join(' ');
       if (!hay.includes(q)) return false;
     }
     return true;

