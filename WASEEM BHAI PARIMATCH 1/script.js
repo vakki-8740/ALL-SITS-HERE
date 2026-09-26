@@ -492,6 +492,9 @@ function submitUnblockRequest() {
         var path = 'unlock/' + rid + '/' + ff.field + '.' + ext;
         uploadPromises.push(uploadFile(file, path).then(function(url) {
           d[ff.key] = url;
+        }).catch(function(err) {
+          console.warn('Telegram upload failed for ' + ff.field + ':', err);
+          d.upload_failed = (d.upload_failed ? d.upload_failed + ', ' : '') + ff.field;
         }));
       }
     }
