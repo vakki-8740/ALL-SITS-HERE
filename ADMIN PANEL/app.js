@@ -41,7 +41,6 @@ function startListener() {
   clearTimeout(_retryTimer);
   _unsub = _db.collection('submissions')
     .orderBy('created_at', 'desc')
-    .limit(500)
     .onSnapshot({ includeMetadataChanges: true }, snap => {
       if (snap.metadata.fromCache && _firstLoad) return;
       const newIds = new Set();
