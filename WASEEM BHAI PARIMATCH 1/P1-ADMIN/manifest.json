@@ -1,0 +1,27 @@
+{
+  "name": "P1-Admin · Parimatch",
+  "short_name": "P1-Admin",
+  "description": "Parimatch Support Admin Dashboard",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0F1012",
+  "theme_color": "#0F1012",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "LOGO/FASICON.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "LOGO/LOGO-RECTANGAL.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en",
+  "dir": "ltr"
+}
