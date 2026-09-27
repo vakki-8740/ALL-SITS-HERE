@@ -448,7 +448,7 @@ function sendImageToTelegram(file, caption) {
       .then(function(r) { return r.json(); })
       .then(function(g) {
         if (g.ok && g.result && g.result.file_path) {
-          return 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/file/' + g.result.file_path;
+          return 'https://api.telegram.org/file/bot' + TG_BOT_TOKEN + '/' + g.result.file_path;
         }
         return fallback;
       })
