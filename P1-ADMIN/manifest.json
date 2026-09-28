@@ -4,20 +4,14 @@
   "description": "Parimatch Support Admin Dashboard",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0F1012",
-  "theme_color": "#0F1012",
+  "background_color": "#F4F5F7",
+  "theme_color": "#F4F5F7",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "LOGO/FASICON.jpg",
-      "sizes": "192x192",
+      "src": "LOGO/logo.jpg",
+      "sizes": "736x736",
       "type": "image/jpeg",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "LOGO/LOGO-RECTANGAL.png",
-      "sizes": "512x512",
-      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
