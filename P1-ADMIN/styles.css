@@ -234,7 +234,7 @@ html, body {
 }
 .copy-btn:active { background: var(--accent-light); color: var(--accent); }
 
-/* proof image rows - "View" buttons in #ffcdac */
+/* proof image rows - "View" buttons: no fill, black border + black text */
 .view-list { padding: 2px 0 8px; }
 .view-row {
   display: flex; align-items: center; justify-content: space-between;
@@ -243,14 +243,14 @@ html, body {
 .view-row:last-child { border-bottom: none; }
 .view-name { font-size: 13px; color: var(--text2); font-weight: 500; }
 .view-btn {
-  flex-shrink: 0; padding: 10px 22px; border: none;
-  background: #ffcdac; color: #000;
-  font-size: 13px; font-weight: 700; cursor: pointer;
+  flex-shrink: 0; padding: 9px 24px; background: none;
+  border: 1px solid #000; border-radius: 8px;
+  color: #000; font-size: 13px; font-weight: 700; cursor: pointer;
   font-family: inherit; letter-spacing: 0.2px; min-height: 40px;
-  border-radius: 8px; transition: filter 0.2s;
+  transition: background 0.2s;
 }
-.view-btn:active { filter: brightness(0.92); }
-.view-btn:hover { filter: brightness(0.96); }
+.view-btn:active { background: #F0F0F0; }
+.view-btn:hover { background: #F5F5F5; }
 
 .detail-acts { display: flex; justify-content: center; padding-top: 16px; }
 .detail-acts .btn-red {
