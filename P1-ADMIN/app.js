@@ -70,6 +70,12 @@ function fmtRel(ts) {
   if (diff < 604800000) return Math.floor(diff / 86400000) + 'd';
   return fmtTime(ts);
 }
+/* Compact card timestamp: "28 Sept", with the year only when it is not this year. */
+function fmtDateShort(ts) {
+  const d = toDate(ts); if (!d) return '—';
+  const day = d.toLocaleString('en-IN', { day: '2-digit', month: 'short' });
+  return d.getFullYear() === new Date().getFullYear() ? day : day + ' ' + d.getFullYear();
+}
 function isImageUrl(s) { return typeof s === 'string' && /^https?:\/\//i.test(s) && !/\.(mp4|webm|mov)$/i.test(s); }
 
 /* The Parimatch forms save Telegram photo links as
@@ -215,9 +221,13 @@ function renderCards(subs) {
     return '<div class="sub-card" data-id="' + esc(s.id) + '">' +
       '<img class="sub-avatar" src="USER-ICON/2288510.png" alt="" />' +
       '<div class="sub-info">' +
-        '<div class="sub-name">' + esc(name) + '</div>' +
-        '<div class="sub-type"><span class="type-badge ' + typeClass(t) + '">' + esc(t) + '</span></div>' +
-        '<div class="sub-time">' + fmtRel(s.created_at) + ' · ' + fmtTime(s.created_at).split(' ')[0] + '</div>' +
+        '<div class="sub-line">' +
+          '<span class="sub-name">' + esc(name) + '</span>' +
+          '<span class="sub-time">' + fmtRel(s.created_at) + ' · ' + fmtDateShort(s.created_at) + '</span>' +
+        '</div>' +
+        '<div class="sub-line sub-line-tags">' +
+          '<span class="type-badge ' + typeClass(t) + '">' + esc(t) + '</span>' +
+        '</div>' +
       '</div>' +
       '<svg class="sub-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
     '</div>';
