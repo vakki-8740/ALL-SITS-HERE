@@ -78,6 +78,8 @@
                 if (file) {
                     if (file.size > 500000) {
                         alert('Image too large! Please select image under 500KB.');
+                        fileInput.value = '';
+                        clearImageUpload(area);
                         return;
                     }
                     const reader = new FileReader();
@@ -85,6 +87,7 @@
                         images[index] = event.target.result;
                         files[index] = file;
                         preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                        markImageUploaded(area, file);
                     };
                     reader.readAsDataURL(file);
                 }

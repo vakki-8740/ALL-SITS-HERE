@@ -88,12 +88,15 @@
             if (file) {
                 if (file.size > 500000) {
                     alert('Image too large! Please select image under 500KB.');
+                    fileInput.value = '';
+                    clearImageUpload(uploadArea);
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     image1Base64 = event.target.result;
                     preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                    markImageUploaded(uploadArea, file);
                 };
                 reader.readAsDataURL(file);
             }
@@ -168,6 +171,7 @@
                 fileInput.value = '';
                 image1Base64 = null;
                 preview.innerHTML = '';
+                clearImageUpload(uploadArea);
                 redirectToChat(2200);
             } catch (err) {
                 console.error('Deposit submit failed:', err);

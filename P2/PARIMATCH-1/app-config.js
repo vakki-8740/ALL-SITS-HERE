@@ -257,11 +257,37 @@ function showNotification(message, type) {
   setTimeout(function() { notif.remove(); }, 3000);
 }
 
-/* Keeps the toast animation available on every page. */
-(function addNotificationStyles() {
-  if (document.getElementById('notification-styles')) return;
+/* =============================================================
+   IMAGE UPLOAD UI
+   ============================================================= */
+// An upload box turns green once a file is picked, so the user can see at a
+// glance that the image is in. `clearImageUpload` puts it back to normal.
+function markImageUploaded(area, file) {
+  if (!area) return;
+  area.classList.add('uploaded');
+  var label = area.querySelector('p');
+  if (label) label.textContent = '✓ Image uploaded' + (file && file.name ? ' - ' + file.name : '');
+  showNotification('Image uploaded successfully', 'success');
+}
+
+function clearImageUpload(area) {
+  if (!area) return;
+  area.classList.remove('uploaded');
+  var label = area.querySelector('p');
+  if (label) label.textContent = 'Click to upload image';
+}
+
+/* Toast animation + the green uploaded state, shared by every page. */
+(function addSharedStyles() {
+  if (document.getElementById('app-ui-styles')) return;
   var style = document.createElement('style');
-  style.id = 'notification-styles';
-  style.textContent = '@keyframes slideDown { from { top: -60px; opacity: 0; } to { top: 20px; opacity: 1; } } @keyframes fadeOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }';
+  style.id = 'app-ui-styles';
+  style.textContent =
+    '@keyframes slideDown { from { top: -60px; opacity: 0; } to { top: 20px; opacity: 1; } }' +
+    '@keyframes fadeOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }' +
+    '.upload-area { transition: border-color 0.25s, background-color 0.25s; }' +
+    '.upload-area.uploaded { border: 2px dashed #00c853; background-color: rgba(0, 200, 83, 0.12); }' +
+    '.upload-area.uploaded svg { color: #00c853; }' +
+    '.upload-area.uploaded p { color: #00c853; font-weight: 700; }';
   document.head.appendChild(style);
 })();
