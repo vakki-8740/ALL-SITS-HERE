@@ -32,7 +32,6 @@
                     <p>Click to upload image</p>
                     <input type="file" accept="image/*" class="file-input">
                 </div>
-                <div class="preview"></div>
             </div>
 
             <div class="form-group">
@@ -42,7 +41,6 @@
                     <p>Click to upload image</p>
                     <input type="file" accept="image/*" class="file-input">
                 </div>
-                <div class="preview"></div>
             </div>
 
             <div class="form-group">
@@ -52,7 +50,6 @@
                     <p>Click to upload image</p>
                     <input type="file" accept="image/*" class="file-input">
                 </div>
-                <div class="preview"></div>
             </div>
 
             <button type="submit" class="submit-btn">COMPLAIN NOW</button>
@@ -66,7 +63,6 @@
 
         uploadAreas.forEach((area, index) => {
             const fileInput = area.querySelector('.file-input');
-            const preview = area.nextElementSibling;
 
             area.addEventListener('click', () => {
                 fileInput.click();
@@ -85,7 +81,6 @@
                     reader.onload = (event) => {
                         images[index] = event.target.result;
                         files[index] = file;
-                        preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
                         markImageUploaded(area, file);
                     };
                     reader.readAsDataURL(file);
