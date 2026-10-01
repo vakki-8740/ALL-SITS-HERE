@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "site_id", "order": "ASCENDING" },
+        { "fieldPath": "mobile", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

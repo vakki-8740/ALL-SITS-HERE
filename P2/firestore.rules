@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Everything the ADMIN PANEL reads (deposit, withdrawal, live chat logins)
+    match /submissions/{doc} {
+      allow read, write, delete: if true;
+    }
+
+    // Live chat of the help center sites (Parimatch 1 / Parimatch 2)
+    match /chat_rooms/{room} {
+      allow read, write, delete: if true;
+
+      match /messages/{message} {
+        allow read, write, delete: if true;
+      }
+    }
+
+    // Chat logins of the help center sites
+    match /chat_users/{user} {
+      allow read, write, delete: if true;
+    }
+
+    // Support presence, written by the admin panel
+    match /admin_status/{doc} {
+      allow read, write: if true;
+    }
+
+    // QR code / UPI id saved from the admin panel settings page
+    match /unblock_settings/{doc} {
+      allow read, write, delete: if true;
+    }
+
+    // Telegram bot token shared by the sites (read only, edit from the console)
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Everything else keeps working exactly as it does today
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

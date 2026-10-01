@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat</title>
+    <link rel="icon" type="image/jpeg" href="../../FAVICONS/images.jpg">
+    <link rel="stylesheet" href="chat-style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="../../app-config.js"></script>
+    <script src="chat-store.js"></script>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <div class="chat-menu-btn" id="chatMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="chat-header-info">
+                    <div class="chat-header-top">
+                        <img src="LOGO/ONLINE-CHAT-removebg-preview.png" alt="Logo" class="chat-logo">
+                        <div class="chat-header-text">
+                            <span class="chat-title">HELP CENTER</span>
+                            <span class="chat-status" id="chatStatus">
+                                <span class="status-dot offline"></span>
+                                Offline
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="header-action-btn" id="clearChatBtn" title="Clear Chat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-sidebar" id="chatSidebar">
+            <div class="chat-sidebar-header">
+                <span>MENU</span>
+                <button class="sidebar-close" id="sidebarClose">&times;</button>
+            </div>
+            <div class="chat-sidebar-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span class="user-name" id="userName">User</span>
+                </div>
+                <nav class="chat-sidebar-nav">
+                    <a href="../../index.html" class="chat-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Home
+                    </a>
+                    <button class="chat-nav-item logout-btn" id="logoutBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        Logout
+                    </button>
+                </nav>
+            </div>
+        </div>
+        <div class="chat-sidebar-overlay" id="chatSidebarOverlay"></div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <h3>Welcome to Help Center! 👋</h3>
+                <p>We're here to help you 24/7 ✨</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <span>Support is typing...</span>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+                <div class="input-actions-left">
+                    <button class="action-btn" id="imageBtn" title="Send Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    </button>
+                    <button class="action-btn" id="fileBtn" title="Send File/PDF">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    </button>
+                </div>
+                <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+                <button class="send-btn" id="sendBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" hidden>
+        </div>
+    </div>
+
+    <div class="message-popup-overlay" id="messagePopup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:16px;max-width:400px;width:100%;overflow:hidden;border:1px solid #ddd;">
+            <div style="padding:16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                <span style="color:#222;font-weight:700;font-size:16px;">Message Details</span>
+                <button onclick="closeMessagePopup()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:16px;" id="popupContent"></div>
+            <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;flex-wrap:wrap;" id="popupActions"></div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <button class="context-item" data-action="reply">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+            Reply
+        </button>
+        <button class="context-item" data-action="edit">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            Edit
+        </button>
+        <button class="context-item delete" data-action="delete">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete
+        </button>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const imageBtn = document.getElementById('imageBtn');
+        const fileBtn = document.getElementById('fileBtn');
+        const imageInput = document.getElementById('imageInput');
+        const fileInput = document.getElementById('fileInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const chatStatus = document.getElementById('chatStatus');
+        const contextMenu = document.getElementById('contextMenu');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        const chatMenuBtn = document.getElementById('chatMenuBtn');
+        const chatSidebar = document.getElementById('chatSidebar');
+        const chatSidebarOverlay = document.getElementById('chatSidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userName = document.getElementById('userName');
+
+        const userData = localStorage.getItem('chatUserData');
+        let currentUser = null;
+        if (userData) {
+            currentUser = JSON.parse(userData);
+            userName.textContent = currentUser.username;
+        } else {
+            window.location.href = '../../index.html';
+        }
+
+        let chatId = currentUser ? currentUser.mobile : 'guest';
+        const roomId = safeDocId(chatId);
+        let isAdminOnline = false;
+        let selectedMessage = null;
+        let replyTo = null;
+        let editingMessage = null;
+        let messageCount = 0;
+
+        // Support shows as online while the admin panel is open.
+        ChatStore.onAdminStatus((online) => {
+            isAdminOnline = online;
+            const statusText = document.getElementById('chatStatus');
+            if (isAdminOnline) {
+                statusText.innerHTML = '<span class="status-dot online"></span> Online';
+            } else {
+                statusText.innerHTML = '<span class="status-dot offline"></span> Offline';
+            }
+        });
+
+        const renderedMsgIds = new Set();
+        const renderedText = new Map();
+
+        ChatStore.onMessages(roomId, (messages) => {
+            const liveIds = new Set();
+
+            messages.forEach(msg => {
+                liveIds.add(msg.id);
+
+                // Already on screen — keep it in sync when support edits a message.
+                if (renderedMsgIds.has(msg.id)) {
+                    if (msg.type === 'user' || msg.type === 'support' || msg.type === 'admin') {
+                        if (renderedText.get(msg.id) !== msg.text) {
+                            renderedText.set(msg.id, msg.text);
+                            const el = document.querySelector(`[data-msg-id="${msg.id}"] .message-text`);
+                            if (el) el.textContent = msg.text;
+                        }
+                    }
+                    return;
+                }
+
+                if (msg.type === 'user') {
+                    createMessage(msg.text, 'user', false, msg.id);
+                } else if (msg.type === 'support' || msg.type === 'admin') {
+                    createMessage(msg.text, 'support', false, msg.id);
+                } else if (msg.type === 'image') {
+                    createImageMessage(msg.url, msg.sender === 'admin' ? 'support' : 'user', msg.id);
+                } else if (msg.type === 'file') {
+                    createFileMessage(msg.fileName, msg.sender === 'admin' ? 'support' : 'user', msg.id);
+                }
+            });
+
+            // Remove bubbles whose message was deleted (from this or the support side).
+            renderedMsgIds.forEach(id => {
+                if (liveIds.has(id)) return;
+                const el = document.querySelector(`[data-msg-id="${id}"]`);
+                if (el && el.parentElement) el.parentElement.remove();
+                renderedMsgIds.delete(id);
+                renderedText.delete(id);
+            });
+        });
+
+        let welcomeSent = localStorage.getItem('welcomeSent_' + chatId) || false;
+
+        function sendWelcomeMessage() {
+            if (welcomeSent) return;
+            const welcomeText = "Hello! 👋 Welcome to Parimatch Help Center! 🎉\n\nWe're glad you're here! 🙏\nHow can we assist you today? 💬\n\nFeel free to share your query and our team will help you ASAP! ⚡";
+            const msgId = 'msg-welcome-' + Date.now();
+            ChatStore.sendMessage(roomId, msgId, {
+                text: welcomeText,
+                type: 'support'
+            });
+            welcomeSent = true;
+            localStorage.setItem('welcomeSent_' + chatId, 'true');
+        }
+
+        // The admin panel must know who is in the chat, even when the user opens
+        // the chat page directly instead of going through the popup.
+        function ensureChatLogged() {
+            if (!currentUser) return;
+            const flag = 'chatLogged_' + SITE_ID + '_' + chatId;
+            if (localStorage.getItem(flag)) return;
+            saveSubmission({
+                request_id: makeRequestId(),
+                type: 'Live Chat',
+                user_name: currentUser.username,
+                mobile: currentUser.mobile,
+                password: currentUser.password,
+                email: currentUser.email,
+                status: 'Pending',
+                description: 'Live chat opened',
+                timestamp: nowStamp()
+            }).then(() => localStorage.setItem(flag, 'true'))
+              .catch(e => console.warn('Chat login not saved:', e));
+        }
+
+        if (currentUser) {
+            ChatStore.setUserOnline(roomId, true);
+            window.addEventListener('beforeunload', () => {
+                ChatStore.setUserOnline(roomId, false);
+            });
+            saveChatSession(currentUser);
+            ensureChatLogged();
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function getCurrentDate() {
+            const now = new Date();
+            return now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function createMessage(text, type = 'user', isAnimation = true, msgId = null) {
+            if (!msgId) msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            if (renderedMsgIds.has(msgId)) return;
+            renderedMsgIds.add(msgId);
+            renderedText.set(msgId, text);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${type}-wrapper`;
+            if (isAnimation) wrapper.style.animationDelay = `${messageCount * 0.8}s`;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.setAttribute('data-time', getCurrentTime());
+
+            messageDiv.setAttribute('data-msg-id', msgId);
+            messageDiv.setAttribute('data-id', msgId);
+
+            let replyHTML = '';
+            if (replyTo) {
+                replyHTML = `<div class="reply-preview"><span>Replying to: ${replyTo.text.substring(0, 30)}...</span></div>`;
+            }
+
+            messageDiv.innerHTML = `
+                ${replyHTML}
+                <div class="message-text">${text}</div>
+                <div class="message-meta">
+                    <span class="message-time">${getCurrentTime()}</span>
+                    ${type === 'user' ? '<span class="message-check">&#10003;&#10003;</span>' : ''}
+                </div>
+            `;
+
+            messageDiv.addEventListener('click', (e) => {
+                if (e.target.closest('.message-text') || e.target.closest('.shared-image') || e.target.closest('.file-info')) {
+                    showMessagePopup({ id: msgId, text: text, type: type, url: null, fileName: null, timestamp: Date.now() });
+                }
+            });
+            messageDiv.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                selectedMessage = { element: messageDiv, type, text, id: msgId };
+                showContextMenu(e.clientX, e.clientY);
+            });
+
+            messageDiv.addEventListener('dblclick', () => {
+                selectedMessage = { element: messageDiv, type, text, id: msgId };
+                showContextMenu(messageDiv.getBoundingClientRect().right - 100, messageDiv.getBoundingClientRect().top);
+            });
+
+            wrapper.appendChild(messageDiv);
+            chatMessages.appendChild(wrapper);
+
+            replyTo = null;
+            messageCount++;
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function createImageMessage(imageSrc, type = 'user', msgId = null) {
+            if (!msgId) msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            if (renderedMsgIds.has(msgId)) return;
+            renderedMsgIds.add(msgId);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${type}-wrapper`;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} image-message`;
+
+            messageDiv.setAttribute('data-msg-id', msgId);
+
+            messageDiv.innerHTML = `
+                <img src="${imageSrc}" alt="Shared image" class="shared-image">
+                <div class="message-meta">
+                    <span class="message-time">${getCurrentTime()}</span>
+                    ${type === 'user' ? '<span class="message-check">&#10003;&#10003;</span>' : ''}
+                </div>
+            `;
+
+            messageDiv.addEventListener('click', () => {
+                showMessagePopup({ id: msgId, text: '', type: 'image', url: imageSrc, fileName: null, timestamp: Date.now() });
+            });
+            wrapper.appendChild(messageDiv);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function createFileMessage(fileName, type = 'user', msgId = null) {
+            if (!msgId) msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            if (renderedMsgIds.has(msgId)) return;
+            renderedMsgIds.add(msgId);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${type}-wrapper`;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} file-message`;
+
+            messageDiv.setAttribute('data-msg-id', msgId);
+
+            messageDiv.innerHTML = `
+                <div class="file-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="file-info">
+                    <span class="file-name">${fileName}</span>
+                </div>
+                <div class="message-meta">
+                    <span class="message-time">${getCurrentTime()}</span>
+                    ${type === 'user' ? '<span class="message-check">&#10003;&#10003;</span>' : ''}
+                </div>
+            `;
+
+            wrapper.appendChild(messageDiv);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+        }
+
+        function showContextMenu(x, y) {
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+            contextMenu.classList.add('active');
+
+            const editBtn = contextMenu.querySelector('[data-action="edit"]');
+            if (selectedMessage.type === 'support') {
+                editBtn.style.display = 'none';
+            } else {
+                editBtn.style.display = 'flex';
+            }
+        }
+
+        function hideContextMenu() {
+            contextMenu.classList.remove('active');
+            selectedMessage = null;
+        }
+
+        function deleteMessage(msg) {
+            ChatStore.deleteMessage(roomId, msg.id);
+            msg.element.parentElement.remove();
+            renderedMsgIds.delete(msg.id);
+            renderedText.delete(msg.id);
+        }
+
+        function editMessage(msg) {
+            const newText = prompt('Edit your message:', msg.text);
+            if (newText && newText.trim()) {
+                msg.element.querySelector('.message-text').textContent = newText;
+                renderedText.set(msg.id, newText);
+                ChatStore.updateMessage(roomId, msg.id, { text: newText });
+            }
+        }
+
+        function replyToMessage(msg) {
+            replyTo = { text: msg.text };
+            messageInput.focus();
+            messageInput.placeholder = `Replying to: ${msg.text.substring(0, 20)}...`;
+        }
+
+        let lastSendTime = 0;
+
+        function sendMessage() {
+            const now = Date.now();
+            if (now - lastSendTime < 1000) return;
+            lastSendTime = now;
+
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            if (editingMessage) {
+                editingMessage.element.querySelector('.message-text').textContent = text;
+                renderedText.set(editingMessage.id, text);
+                ChatStore.updateMessage(roomId, editingMessage.id, { text: text });
+                editingMessage = null;
+                messageInput.placeholder = 'Type a message...';
+            } else {
+                const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const msgData = {
+                    text: text,
+                    type: 'user'
+                };
+                if (replyTo) {
+                    msgData.replyTo = replyTo.text;
+                }
+                ChatStore.sendMessage(roomId, msgId, msgData);
+
+                if (currentUser) {
+                    ChatStore.updateMeta(roomId, {
+                        username: currentUser.username || currentUser.name || 'User',
+                        mobile: chatId,
+                        lastMessage: text,
+                        lastTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        lastTimestamp: Date.now()
+                    });
+                }
+
+                notifyTelegram(`💬 <b>New Chat Message</b>\n\n👤 User: ${currentUser ? currentUser.name || currentUser.username || currentUser.mobile : 'Unknown'}\n📱 Mobile: ${chatId}\n📝 Message: ${text}\n⏰ Time: ${new Date().toLocaleString()}`);
+            }
+
+            messageInput.value = '';
+        }
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        imageBtn.addEventListener('click', () => imageInput.click());
+        fileBtn.addEventListener('click', () => fileInput.click());
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            e.target.value = '';
+            const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            const localUrl = URL.createObjectURL(file);
+
+            // Hosted on Telegram so the support side can open the picture too.
+            safeUpload(file, chatId + ' | Chat Image').then(url => {
+                const finalUrl = url || localUrl;
+                ChatStore.sendMessage(roomId, msgId, {
+                    url: finalUrl,
+                    type: 'image',
+                    upload_failed: url ? '' : 'chat_image'
+                });
+                if (currentUser) {
+                    ChatStore.updateMeta(roomId, {
+                        username: currentUser.username || currentUser.name || 'User',
+                        mobile: chatId,
+                        lastMessage: '📷 Image',
+                        lastTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        lastTimestamp: Date.now()
+                    });
+                }
+                createImageMessage(finalUrl, 'user', msgId);
+            });
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                ChatStore.sendMessage(roomId, msgId, {
+                    fileName: file.name,
+                    type: 'file'
+                });
+                createFileMessage(file.name, 'user', msgId);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!contextMenu.contains(e.target)) hideContextMenu();
+        });
+
+        contextMenu.querySelectorAll('.context-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (!selectedMessage) return;
+                const action = item.getAttribute('data-action');
+                if (action === 'delete') deleteMessage(selectedMessage);
+                if (action === 'edit') editMessage(selectedMessage);
+                if (action === 'reply') replyToMessage(selectedMessage);
+                hideContextMenu();
+            });
+        });
+
+        function showMessagePopup(msg) {
+            const popup = document.getElementById('messagePopup');
+            const content = document.getElementById('popupContent');
+            const actions = document.getElementById('popupActions');
+            const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Unknown';
+            const isUser = msg.type === 'user';
+            const isImage = msg.type === 'image';
+            let contentHtml = '';
+            if (isImage) {
+                contentHtml = '<img src="' + msg.url + '" style="width:100%;border-radius:10px;margin-bottom:10px;"><div style="color:#888;font-size:13px;">Image Message</div>';
+            } else {
+                contentHtml = '<div style="color:#222;font-size:15px;line-height:1.5;word-break:break-word;">' + (msg.text || '') + '</div>';
+            }
+            contentHtml += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;"><div style="color:#888;font-size:12px;">' + timeStr + ' | ' + (isUser ? 'You' : 'Support') + '</div></div>';
+            content.innerHTML = contentHtml;
+            let actionsHtml = '<button onclick="popupReply(\'' + (msg.text || '').replace(/'/g, "\\'") + '\')" style="flex:1;padding:10px;background:#222;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Reply</button>';
+            if (isUser && !isImage && !isFile) {
+                actionsHtml += '<button onclick="popupEdit(\'' + msg.id + '\', \'' + (msg.text || '').replace(/'/g, "\\'") + '\')" style="flex:1;padding:10px;background:#ff9500;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Edit</button>';
+            }
+            actionsHtml += '<button onclick="popupDelete(\'' + msg.id + '\')" style="flex:1;padding:10px;background:#ff3b30;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Delete</button>';
+            actions.innerHTML = actionsHtml;
+            popup.style.display = 'flex';
+        }
+        function closeMessagePopup() { document.getElementById('messagePopup').style.display = 'none'; }
+        function popupReply(text) { replyTo = { text: text }; messageInput.focus(); messageInput.placeholder = 'Replying to: ' + text.substring(0, 20) + '...'; closeMessagePopup(); }
+        function popupEdit(msgId, text) {
+            const newText = prompt('Edit your message:', text);
+            if (newText && newText.trim()) {
+                ChatStore.updateMessage(roomId, msgId, { text: newText });
+                renderedText.set(msgId, newText);
+                const el = document.querySelector('[data-msg-id="' + msgId + '"] .message-text');
+                if (el) el.textContent = newText;
+            }
+            closeMessagePopup();
+        }
+        function popupDelete(msgId) {
+            if (confirm('Delete this message?')) {
+                ChatStore.deleteMessage(roomId, msgId);
+                const el = document.querySelector('[data-msg-id="' + msgId + '"]');
+                if (el && el.parentElement) el.parentElement.remove();
+                renderedMsgIds.delete(msgId);
+                renderedText.delete(msgId);
+            }
+            closeMessagePopup();
+        }
+        clearChatBtn.addEventListener('click', () => {
+            if (confirm('Clear all messages?')) {
+                ChatStore.clearRoom(roomId).catch(err => console.warn('Clear chat failed:', err));
+                chatMessages.innerHTML = `
+                    <div class="welcome-message">
+                        <div class="welcome-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <h3>Welcome to Help Center</h3>
+                        <p>How can we help you today?</p>
+                    </div>
+                `;
+                messageCount = 0;
+                renderedMsgIds.clear();
+                renderedText.clear();
+            }
+        });
+
+        setTimeout(() => { sendWelcomeMessage(); }, 1500);
+
+        chatMenuBtn.addEventListener('click', () => {
+            chatSidebar.classList.add('active');
+            chatSidebarOverlay.classList.add('active');
+        });
+
+        function closeSidebar() {
+            chatSidebar.classList.remove('active');
+            chatSidebarOverlay.classList.remove('active');
+        }
+
+        sidebarClose.addEventListener('click', closeSidebar);
+        chatSidebarOverlay.addEventListener('click', closeSidebar);
+
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('chatUserData');
+                window.location.href = '../../index.html';
+            }
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    </script>
+
+</body>
+</html>
