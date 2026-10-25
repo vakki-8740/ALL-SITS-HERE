@@ -83,44 +83,75 @@ function saveSubmission(data) {
   });
 }
 
-// ===== GLOBAL NOTIFICATION =====
+// ===== GLOBAL NOTIFICATION (OWN LABRARY toast) =====
 function showNotification(message, type) {
   type = type || "info";
-  var existing = document.querySelector('.ios-notification');
+  var existing = document.querySelector('.app-toast');
   if (existing) existing.remove();
   var notif = document.createElement('div');
-  notif.className = 'ios-notification ' + type;
+  notif.className = 'app-toast ' + type;
   var iconSvg = '';
   if (type === 'success') {
-    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>';
+    iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   } else if (type === 'error') {
-    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
   } else {
-    iconSvg = '<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
   }
-  notif.innerHTML = '<div class="notif-content"><span class="notif-icon">' + iconSvg + '</span><span>' + message + '</span></div>';
-  notif.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:' + (type === 'success' ? 'rgba(52,199,89,0.95)' : type === 'error' ? 'rgba(255,59,48,0.95)' : 'rgba(216,245,41,0.95)') + ';color:#0F1012;padding:14px 20px;border-radius:16px;font-weight:500;font-size:0.95rem;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(10px);max-width:90%;text-align:center;animation:slideDown 0.3s ease,fadeOut 0.3s ease 2.7s forwards;';
+  notif.innerHTML = '<span class="toast-ic">' + iconSvg + '</span><span class="toast-msg">' + message + '</span>';
   document.body.appendChild(notif);
-  setTimeout(function() { notif.remove(); }, 3000);
+  setTimeout(function() { if (notif.parentNode) notif.remove(); }, 3000);
+}
+
+// ===== THEME + MOBILE NAV (OWN LABRARY) =====
+function initThemeAndNav() {
+  var root = document.documentElement;
+  var toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  }
+
+  var menuBtn = document.getElementById('menuBtn');
+  var navLinks = document.getElementById('navLinks');
+  if (menuBtn && navLinks) {
+    menuBtn.addEventListener('click', function() {
+      var open = navLinks.classList.toggle('open');
+      menuBtn.classList.toggle('open', open);
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    navLinks.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        navLinks.classList.remove('open');
+        menuBtn.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+}
+
+function setUploadLabel(label, text) {
+  if (!label) return;
+  var textEl = label.querySelector('[data-fname]');
+  if (textEl) textEl.textContent = text;
+}
+
+function resetUploadLabel(label, defaultText) {
+  if (!label) return;
+  label.classList.remove('has-file');
+  setUploadLabel(label, defaultText || 'Choose image');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Splash screen - remove after animation
-  setTimeout(() => {
-    const splash = document.getElementById('splashScreen');
-    if (splash) splash.remove();
-  }, 2800);
+  initThemeAndNav();
 
-  // Page transition helper
+  // Simple navigation helper
   function navigateWithTransition(url) {
-    const overlay = document.getElementById('pageTransition');
-    if (overlay) {
-      overlay.classList.add('active');
-      setTimeout(() => { window.location.href = url; }, 400);
-    } else {
-      window.location.href = url;
-    }
+    window.location.href = url;
   }
 
   // Auto-select tab from URL params (complaint.html?tab=deposit)
@@ -356,39 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Add keyframes
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideDown { from { top: -60px; opacity: 0; } to { top: 20px; opacity: 1; } }
-    @keyframes fadeOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
-  `;
-  document.head.appendChild(style);
-
-  // iOS Input Enhancements
-  document.querySelectorAll('input, textarea').forEach(input => {
-    input.addEventListener('focus', function() {
-      this.parentElement.style.transform = 'scale(1.01)';
-      this.parentElement.style.transition = 'transform 0.2s ease';
-    });
-    input.addEventListener('blur', function() {
-      this.parentElement.style.transform = 'scale(1)';
-    });
-  });
-
-  // Prevent zoom on focus (iOS)
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    el.addEventListener('focus', () => {
-      if (window.innerWidth < 1024) {
-        document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-      }
-    });
-    el.addEventListener('blur', () => {
-      document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
-    });
-  });
-
-  console.log("%c[Parimatch Support Loaded]", "color:#D8F529; font-size:14px; font-weight:bold;");
-  console.log("%c[Firebase Integration Ready | Secure]", "color:#FFA000;");
+  console.log("%c[Parimatch Support Loaded]", "color:#4f6bed; font-size:14px; font-weight:bold;");
+  console.log("%c[Firebase Integration Ready | Secure]", "color:#22a06b;");
 
   // Preload Firebase in background
   loadFirebase().catch(e => console.warn('Firebase preload skipped:', e));
@@ -511,7 +511,7 @@ function submitUnblockRequest() {
   var submitBtn = $unlock('unblockSubmit');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+    submitBtn.innerHTML = '<span class="spin" aria-hidden="true"></span> Verifying...';
   }
   var rid = _rid || "TX" + Math.floor(100000 + Math.random() * 900000);
   _rid = rid;
@@ -549,17 +549,13 @@ function submitUnblockRequest() {
     showUnlockToast('Request sent to support team! ✅');
     return saveSubmission(d);
   }).then(function() {
-    document.querySelectorAll('.file-label').forEach(function(l) {
-      l.classList.remove('has-file');
-      var icon = l.querySelector('i');
-      var span = l.querySelector('span');
-      if (icon && span) {
-        if (l.id.includes('Issue') || l.id.includes('issue')) { icon.className = 'fas fa-image'; span.textContent = 'Choose issue screenshot'; }
-        else if (l.id.includes('aadharFront') || l.id.includes('AadharFront')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose Aadhar front image'; }
-        else if (l.id.includes('aadharBack') || l.id.includes('AadharBack')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose Aadhar back image'; }
-        else if (l.id.includes('identity') || l.id.includes('Identity')) { icon.className = 'fas fa-id-card'; span.textContent = 'Choose identity verification image'; }
-      }
-    });
+    var unblockLabels = [
+      ['issueImageLabel', 'Choose issue screenshot'],
+      ['aadharFrontLabel', 'Choose Aadhaar front image'],
+      ['aadharBackLabel', 'Choose Aadhaar back image'],
+      ['identityLabel', 'Choose identity verification image']
+    ];
+    unblockLabels.forEach(function(pair) { resetUploadLabel($unlock(pair[0]), pair[1]); });
     document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
     if (submitBtn) submitBtn.disabled = false;
     // Firestore save succeeded - hand the user over to live chat.
@@ -569,7 +565,7 @@ function submitUnblockRequest() {
     showUnlockToast('Submission failed - try again', 'error');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify Account';
+      submitBtn.innerHTML = 'Verify account';
     }
   });
 }
@@ -614,25 +610,23 @@ try {
   }
 } catch (e) { console.warn('unblock steps:', e); }
 
-// ===== FILE INPUT UI (unblock page) =====
+// ===== FILE INPUT UI (all upload pages) =====
 try {
   document.querySelectorAll('.file-input-wrap input[type="file"]').forEach(function(input) {
     input.addEventListener('change', function() {
       var label = this.parentElement.querySelector('.file-label');
       var nameEl = this.parentElement.parentElement.querySelector('.file-name');
       if (this.files && this.files.length > 0) {
-        label.classList.add('has-file');
-        var icon = label.querySelector('i');
-        var span = label.querySelector('span');
-        if (icon) icon.className = 'fas fa-check-circle';
+        if (label) label.classList.add('has-file');
+        var textEl = label ? label.querySelector('[data-fname]') : null;
         if (this.files.length > 1) {
-          if (span) span.textContent = this.files.length + ' files selected';
+          if (textEl) textEl.textContent = this.files.length + ' files selected';
           if (nameEl) nameEl.textContent = this.files.length + ' files selected: ' + this.files[0].name + (this.files.length > 1 ? ' +' + (this.files.length - 1) + ' more' : '');
         } else {
-          if (span) span.textContent = this.files[0].name;
+          if (textEl) textEl.textContent = this.files[0].name;
           if (nameEl) nameEl.textContent = 'Selected: ' + this.files[0].name;
         }
-      } else {
+      } else if (label) {
         label.classList.remove('has-file');
       }
     });
@@ -743,7 +737,7 @@ function submitBonusRequest() {
   var submitBtn = $unlock('bStep2Submit');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.innerHTML = '<span class="spin" aria-hidden="true"></span> Submitting...';
   }
   var rid = _bRid || "TX" + Math.floor(100000 + Math.random() * 900000);
   _bRid = rid;
@@ -781,15 +775,8 @@ function submitBonusRequest() {
     showBonusToast('Request sent to support team! ✅');
     return saveSubmission(d);
   }).then(function() {
-    document.querySelectorAll('.file-label').forEach(function(l) {
-      l.classList.remove('has-file');
-      var icon = l.querySelector('i');
-      var span = l.querySelector('span');
-      if (icon && span) {
-        if (l.id.includes('bonusIssue') || l.id.includes('BonusIssue')) { icon.className = 'fas fa-image'; span.textContent = 'Choose issue screenshot'; }
-        else if (l.id.includes('profileImage') || l.id.includes('ProfileImage')) { icon.className = 'fas fa-user'; span.textContent = 'Choose profile image'; }
-      }
-    });
+    resetUploadLabel($unlock('bonusIssueImageLabel'), 'Choose issue screenshot');
+    resetUploadLabel($unlock('profileImageLabel'), 'Choose profile image');
     document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
     if (submitBtn) submitBtn.disabled = false;
     // Firestore save succeeded - hand the user over to live chat.
@@ -799,7 +786,7 @@ function submitBonusRequest() {
     showBonusToast('Submission failed - try again');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Now';
+      submitBtn.innerHTML = 'Submit now';
     }
   });
 }
@@ -866,30 +853,17 @@ function setupUploadLabel(inputId, labelId, nameId) {
   var nameEl = document.getElementById(nameId);
   if (!input || !label) return;
   input.addEventListener('change', function() {
+    var textEl = label.querySelector('[data-fname]');
     if (this.files && this.files[0]) {
-      var span = label.querySelector('span');
-      var icon = label.querySelector('i');
-      if (span) span.textContent = 'Uploading...';
-      if (icon) { icon.className = 'fas fa-spinner fa-spin'; }
-      label.style.background = 'var(--card-gray)';
-      label.style.color = 'var(--text-secondary)';
-      label.style.borderColor = 'rgba(255,255,255,0.2)';
+      label.classList.add('has-file');
+      if (textEl) textEl.textContent = 'Uploading...';
       setTimeout(function() {
-        if (span) span.textContent = 'Uploaded';
-        if (icon) { icon.className = 'fas fa-check-circle'; }
-        label.style.background = 'rgba(52,199,89,0.2)';
-        label.style.color = '#34C759';
-        label.style.borderColor = '#34C759';
+        if (textEl) textEl.textContent = 'Uploaded';
         if (nameEl) nameEl.textContent = 'Selected: ' + input.files[0].name;
-      }, 1500);
+      }, 900);
     } else {
-      var span = label.querySelector('span');
-      var icon = label.querySelector('i');
-      if (span) span.textContent = 'Choose Image';
-      if (icon) { icon.className = 'fas fa-cloud-upload-alt'; }
-      label.style.background = 'var(--card-gray)';
-      label.style.color = 'var(--text-secondary)';
-      label.style.borderColor = 'rgba(255,255,255,0.2)';
+      label.classList.remove('has-file');
+      if (textEl) textEl.textContent = 'Choose image';
       if (nameEl) nameEl.textContent = '';
     }
   });
@@ -923,7 +897,7 @@ try {
 
       var submitBtn = kycForm.querySelector('.btn-submit');
       var originalBtnText = submitBtn.innerHTML;
-      submitBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Uploading...";
+      submitBtn.innerHTML = "<span class='spin' aria-hidden='true'></span> Uploading...";
       submitBtn.disabled = true;
 
       try {
@@ -960,14 +934,7 @@ try {
         showNotification("Request submitted successfully!", "success");
         kycForm.reset();
         document.querySelectorAll('.file-label').forEach(function(l) {
-          l.classList.remove('has-file');
-          l.style.background = 'var(--card-gray)';
-          l.style.color = 'var(--text-secondary)';
-          l.style.borderColor = 'rgba(255,255,255,0.2)';
-          var span = l.querySelector('span');
-          var icon = l.querySelector('i');
-          if (span) span.textContent = 'Choose Image';
-          if (icon) icon.className = 'fas fa-cloud-upload-alt';
+          resetUploadLabel(l, 'Choose image');
         });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
         // Firestore save succeeded - hand the user over to live chat.
@@ -1011,7 +978,7 @@ try {
 
       var submitBtn = bankForm.querySelector('.btn-submit');
       var originalBtnText = submitBtn.innerHTML;
-      submitBtn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Uploading...";
+      submitBtn.innerHTML = "<span class='spin' aria-hidden='true'></span> Uploading...";
       submitBtn.disabled = true;
 
       try {
@@ -1045,14 +1012,7 @@ try {
         showNotification("Request submitted successfully!", "success");
         bankForm.reset();
         document.querySelectorAll('.file-label').forEach(function(l) {
-          l.classList.remove('has-file');
-          l.style.background = 'var(--card-gray)';
-          l.style.color = 'var(--text-secondary)';
-          l.style.borderColor = 'rgba(255,255,255,0.2)';
-          var span = l.querySelector('span');
-          var icon = l.querySelector('i');
-          if (span) span.textContent = 'Choose Image';
-          if (icon) icon.className = 'fas fa-cloud-upload-alt';
+          resetUploadLabel(l, 'Choose image');
         });
         document.querySelectorAll('.file-name').forEach(function(n) { n.textContent = ''; });
         // Firestore save succeeded - hand the user over to live chat.
