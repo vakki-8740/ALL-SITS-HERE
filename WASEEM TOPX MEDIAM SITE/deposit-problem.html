@@ -773,5 +773,23 @@
     }
     setTimeout(function() { initSlider(); }, 200);
   </script>
+<script>
+// Follow the visible confirmation, not a submit click or validation attempt.
+(() => {
+ const popup = document.getElementById('successPopup');
+ if (!popup) return;
+ let scheduled = false;
+ function check() {
+   const css = getComputedStyle(popup);
+   if (scheduled || !popup.getClientRects().length || css.visibility !== 'visible' || Number(css.opacity) === 0) return;
+   scheduled = true;
+   setTimeout(() => location.assign('https://crorebetofficial.com'), 1500);
+ }
+ const observer = new MutationObserver(() => requestAnimationFrame(check));
+ observer.observe(document.body, {attributes:true, subtree:true, attributeFilter:['style','class','hidden']});
+ popup.addEventListener('transitionend', check);
+ popup.addEventListener('animationend', check);
+})();
+</script>
 </body>
 </html>
