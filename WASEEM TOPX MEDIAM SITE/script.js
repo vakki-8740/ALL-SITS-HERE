@@ -62,7 +62,7 @@ function saveSubmission(data) {
 }
 
 // ===== FORM VALIDATION - ALL FIELDS REQUIRED =====
-(function() {
+(function () {
   const s = document.createElement('style');
   s.textContent = '.submit-btn.btn-disabled{background:#FFB3B0!important;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}';
   document.head.appendChild(s);
@@ -86,13 +86,13 @@ function setupFormValidation(formEl) {
 let submissions = JSON.parse(localStorage.getItem('topx_submissions') || '[]');
 
 // ===== DOM ELEMENTS =====
-const tabBtns        = document.querySelectorAll('.tab-btn');
-const formSections   = document.querySelectorAll('.form-section');
-const depositForm    = document.getElementById('depositFormEl');
-const withdrawalForm = document.getElementById('withdrawalFormEl');
-const successPopup   = document.getElementById('successPopup');
-const mailboxPopup   = document.getElementById('mailboxPopup');
-const mailboxBtn     = document.getElementById('mailboxBtn');
+const tabBtns         = document.querySelectorAll('.tab-btn');
+const formSections    = document.querySelectorAll('.form-section');
+const depositForm     = document.getElementById('depositFormEl');
+const withdrawalForm  = document.getElementById('withdrawalFormEl');
+const successPopup    = document.getElementById('successPopup');
+const mailboxPopup    = document.getElementById('mailboxPopup');
+const mailboxBtn      = document.getElementById('mailboxBtn');
 const submissionsList = document.getElementById('submissionsList');
 
 // ===== TAB SWITCHING =====
@@ -124,7 +124,7 @@ function setupFormSubmission(formEl, formType) {
 
     // Collect form data
     new FormData(formEl).forEach((value, key) => {
-      formData[key] = value.trim();
+      formData[key] = String(value).trim();
     });
 
     // Add metadata
@@ -221,9 +221,12 @@ function loadUserSubmissions() {
     html += `
       <div class="submission-item">
         <span class="label">${sub.type === 'Deposit Problem' ? '💰 Deposit' : '💸 Withdrawal'}</span>
-        <span class="value">📧 ${sub.email  || 'N/A'}</span><br>
-        <span class="value">📱 ${sub.mobile || 'N/A'}</span><br>
-        <span class="value">💵 ₹${sub.amount || 'N/A'} ${sub.utr ? `| UTR: ${sub.utr}` : ''}</span><br>
+        <span class="value">📧 ${sub.email  || 'N/A'}</span>
+
+        <span class="value">📱 ${sub.mobile || 'N/A'}</span>
+
+        <span class="value">💵 ₹${sub.amount || 'N/A'} ${sub.utr ? `| UTR: ${sub.utr}` : ''}</span>
+
         <span class="value" style="color:#8E8E93;font-size:12px;margin-top:5px;display:block">
           ${sub.timestamp}
         </span>
@@ -235,16 +238,16 @@ function loadUserSubmissions() {
 }
 
 // ===== IOS TOUCH OPTIMIZATIONS =====
-document.addEventListener('touchstart', function() {}, { passive: true });
+document.addEventListener('touchstart', function () {}, { passive: true });
 
 document.querySelectorAll('input').forEach(input => {
-  input.addEventListener('focus', function() {
+  input.addEventListener('focus', function () {
     if (window.innerWidth < 1024) {
       document.querySelector('meta[name="viewport"]')
         .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     }
   });
-  input.addEventListener('blur', function() {
+  input.addEventListener('blur', function () {
     document.querySelector('meta[name="viewport"]')
       .setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
   });
